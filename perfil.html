@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="manifest" href="manifest.json" />
+  <title>NeuroPro — Perfiles</title>
+  <meta name="description" content="Administra el perfil del alumno y su red de apoyo en NeuroPro." />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{--np-pink:#f43f5e;--np-pink-hover:#e11d48;--np-pink-soft:#fff1f2;--np-blue:#3b82f6;--np-blue-soft:#eff6ff;--np-purple:#a855f7;--np-green:#10b981;--np-orange:#f97316;--np-bg:#f8fafc;--np-card:#ffffff;--np-sidebar:#ffffff;--np-border:#e2e8f0;--np-text:#0f172a;--np-text-muted:#64748b;--np-shadow:0 4px 24px rgba(0,0,0,.07);}
+    [data-bs-theme="dark"]{--np-bg:#090d16;--np-card:#111827;--np-sidebar:#0b111e;--np-border:#1e293b;--np-text:#f1f5f9;--np-text-muted:#94a3b8;--np-shadow:0 4px 24px rgba(0,0,0,.4);}
+    body{font-family:'Inter',sans-serif;background:var(--np-bg);color:var(--np-text);transition:background .3s,color .3s;}
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px;}
+    [data-bs-theme="dark"]::-webkit-scrollbar-thumb{background:#1f2937;}
+    .fade-in-up{animation:fadeInUp .4s ease-out both;}.delay-1{animation-delay:.08s;}.delay-2{animation-delay:.16s;}.delay-3{animation-delay:.24s;}
+    /* Sidebar */
+    .np-sidebar{width:72px;min-height:100vh;background:var(--np-sidebar);border-right:1px solid var(--np-border);display:flex;flex-direction:column;align-items:center;padding:1.25rem .75rem;gap:0;position:fixed;top:0;left:0;z-index:200;box-shadow:2px 0 12px rgba(0,0,0,.05);user-select:none;}
+    .np-sidebar *{user-select:none;}
+    .np-sidebar .nav-btn{width:44px;height:44px;border-radius:14px;border:none;display:flex;align-items:center;justify-content:center;font-size:.95rem;margin-bottom:.6rem;transition:all .2s;color:var(--np-text-muted);background:transparent;position:relative;}
+    .np-sidebar .nav-btn:hover{background:var(--np-pink-soft);color:var(--np-pink);transform:scale(1.08);}
+    .np-sidebar .nav-btn.active{background:var(--np-pink);color:#fff;box-shadow:0 4px 12px rgba(244,63,94,.3);}
+    [data-bs-theme="dark"] .np-sidebar .nav-btn:hover{background:rgba(244,63,94,.12);}
+    .np-sidebar .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:.6rem;}
+    .np-sidebar .btn-theme-sb{width:38px;height:38px;border-radius:12px;border:1px solid var(--np-border);background:var(--np-card);color:var(--np-text-muted);display:flex;align-items:center;justify-content:center;transition:all .2s;cursor:pointer;}
+    .np-sidebar .btn-theme-sb:hover{transform:scale(1.1);}
+    .np-sidebar .avatar-pill{width:38px;height:38px;border-radius:12px;border:1px solid var(--np-border);background:var(--np-pink-soft);color:var(--np-pink);font-weight:800;font-size:.7rem;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:all .2s;padding:0;overflow:hidden;}
+    .np-sidebar .avatar-pill:hover{transform:scale(1.08);background:var(--np-pink-soft);color:var(--np-pink);}
+    .np-sidebar .avatar-pill.active{background:var(--np-pink);color:#fff;box-shadow:0 4px 12px rgba(244,63,94,.3);border-color:var(--np-pink);}
+    .sidebar-tooltip{position:absolute;left:56px;background:#1e293b;color:#fff;border-radius:8px;padding:.25rem .65rem;font-size:.72rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:300;}
+    .nav-btn:hover .sidebar-tooltip{opacity:1;}
+    .np-main{margin-left:72px;min-height:100vh;}
+    .np-header{background:var(--np-card);border-bottom:1px solid var(--np-border);padding:.9rem 1.75rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+    .np-header-img{max-height:52px;object-fit:contain;}
+    .np-card{background:var(--np-card);border:1px solid var(--np-border);border-radius:20px;box-shadow:var(--np-shadow);}
+    #toast-container{position:fixed;top:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none;}
+    #toast-container .toast{pointer-events:auto;}
+    .np-pill{border-radius:999px;padding:.3rem .85rem;font-size:.72rem;font-weight:700;display:inline-flex;align-items:center;gap:.4rem;}
+ 
+    /* Avatar circle */
+    .avatar-circle{
+      width:100px;height:100px;border-radius:50%;
+      background:linear-gradient(135deg,var(--np-pink),var(--np-purple));
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-size:2rem;font-weight:900;
+      box-shadow:0 8px 24px rgba(244,63,94,.3);
+      margin:0 auto;position:relative;cursor:pointer;overflow:hidden;
+    }
+    .avatar-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+    .avatar-circle .avatar-overlay{
+      position:absolute;inset:0;background:rgba(0,0,0,.4);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;transition:opacity .2s;font-size:1.2rem;color:#fff;
+    }
+    .avatar-circle:hover .avatar-overlay{opacity:1;}
+ 
+    /* Form fields */
+    .np-input{
+      background:var(--np-bg);border:1.5px solid var(--np-border);border-radius:12px;
+      padding:.6rem 1rem;font-size:.85rem;color:var(--np-text);font-family:'Inter',sans-serif;
+      width:100%;transition:border-color .2s,box-shadow .2s;
+    }
+    .np-input:focus{outline:none;border-color:var(--np-pink);box-shadow:0 0 0 3px rgba(244,63,94,.1);}
+    .np-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--np-text-muted);margin-bottom:.4rem;display:block;}
+ 
+    /* Network member cards */
+    .network-card{
+      background:var(--np-card);border:1.5px solid var(--np-border);border-radius:18px;
+      padding:1.25rem;transition:all .2s;
+    }
+    .network-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px);}
+    .network-avatar{
+      width:52px;height:52px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.1rem;font-weight:800;color:#fff;margin-right:1rem;flex-shrink:0;
+      position:relative; overflow:hidden;
+    }
+    .network-avatar-overlay{
+      position:absolute;inset:0;background:rgba(0,0,0,.45);
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;transition:opacity .2s;font-size:.85rem;color:#fff;
+    }
+    .network-avatar:hover .network-avatar-overlay{opacity:1;}
+    .network-role-badge{
+      font-size:.68rem;font-weight:700;padding:.25rem .7rem;border-radius:999px;
+    }
+ 
+    /* Save btn */
+    .btn-np-save{
+      background:linear-gradient(135deg,var(--np-pink),var(--np-purple));
+      color:#fff;border:none;border-radius:14px;padding:.7rem 1.75rem;
+      font-weight:800;font-size:.85rem;transition:all .2s;
+      box-shadow:0 4px 14px rgba(244,63,94,.3);
+    }
+    .btn-np-save:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(244,63,94,.4);color:#fff;}
+ 
+    @media(max-width:768px){
+      .np-sidebar{
+        width:100%; min-height:auto; height:62px;
+        flex-direction:row; border-right:none;
+        border-top:1px solid var(--np-border);
+        position:fixed; bottom:0; left:0; top:auto;
+        padding:.5rem 1rem; z-index:300;
+        background:var(--np-sidebar);
+        box-shadow:0 -2px 12px rgba(0,0,0,.1);
+        justify-content:space-around;
+      }
+      .np-sidebar .nav-btn{margin-bottom:0; margin-right:0; width:48px; height:48px;}
+      .np-sidebar .sidebar-bottom{flex-direction:row; margin-top:0; margin-left:0; gap:.4rem;}
+      .np-main{margin-left:0; padding-bottom:72px !important;}
+      .sidebar-tooltip{display:none;}
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="d-flex flex-column flex-md-row">
+
+  <!-- Sidebar -->
+  <nav class="np-sidebar">
+    <button class="nav-btn" onclick="window.location.href='dashboard.html'" title="Panel"><i class="fas fa-house"></i><span class="sidebar-tooltip">Panel Principal</span></button>
+    <button class="nav-btn" onclick="window.location.href='actividades.html'" title="Actividades"><i class="fas fa-list-check"></i><span class="sidebar-tooltip">Actividades</span></button>
+    <button class="nav-btn" onclick="window.location.href='agenda.html'" title="Agenda"><i class="fas fa-calendar-check"></i><span class="sidebar-tooltip">Agenda de Tareas</span></button>
+    <button class="nav-btn" onclick="window.location.href='indicadores.html'" title="Indicadores"><i class="fas fa-chart-line"></i><span class="sidebar-tooltip">Indicadores</span></button>
+    <button class="nav-btn" onclick="window.location.href='alumno.html'" title="Vista Alumno"><i class="fas fa-child-reaching"></i><span class="sidebar-tooltip">Vista del Alumno</span></button>
+    <div class="sidebar-bottom">
+      <button class="btn-theme-sb border-0" onclick="NP_toggleTheme()"><i id="theme-icon" class="fas fa-moon" style="font-size:.85rem;"></i></button>
+      <button class="avatar-pill active" id="sidebar-avatar" onclick="window.location.href='perfil.html'" title="Configurar Perfil">CC</button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="np-main flex-grow-1">
+    <header class="np-header">
+      <img src="encabezado.png" alt="NeuroPro" class="np-header-img" />
+      <div class="d-flex align-items-center gap-3">
+        <span id="session-badge" class="np-pill" style="background:rgba(244,63,94,.1);color:var(--np-pink);">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--np-pink);"></span> Cargando…
+        </span>
+        <button id="btn-logout" onclick="NP_logout()" class="btn btn-sm fw-semibold" style="border-radius:10px;background:var(--np-pink-soft);color:var(--np-pink);border:1px solid rgba(244,63,94,.2);font-size:.75rem;display:none;">
+          <i class="fas fa-right-from-bracket me-1"></i> Salir
+        </button>
+      </div>
+    </header>
+
+    <div class="p-4 p-md-5" style="max-width:1100px;margin:0 auto;">
+
+      <!-- Page title -->
+      <div class="mb-5 fade-in-up">
+        <div class="d-flex align-items-center gap-2 mb-1" style="color:var(--np-pink);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;">
+          <i class="fas fa-user-circle"></i> Gestión de Perfiles
+        </div>
+        <h2 class="fw-black mb-1" style="font-size:1.6rem;">Mi Perfil y Mi Red de Apoyo</h2>
+        <p style="color:var(--np-text-muted);font-size:.85rem;margin:0;">Configura la información del alumno y gestiona los cuidadores de su entorno.</p>
+      </div>
+
+      <div class="row g-4">
+
+        <!-- LEFT: Mi Perfil -->
+        <div class="col-lg-5 fade-in-up delay-1">
+          <div class="np-card p-4 p-md-5 h-100">
+            <div class="d-flex align-items-center gap-2 mb-4" style="color:var(--np-pink);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;">
+              <i class="fas fa-star"></i> Mi Perfil
+            </div>
+
+            <!-- Avatar -->
+            <div class="text-center mb-4">
+              <div class="avatar-circle" id="student-avatar-circle" onclick="triggerStudentPhotoUpload()" title="Cambiar foto">
+                <span id="avatar-initials">ED</span>
+                <img id="avatar-img" src="" alt="" style="display:none;" />
+                <div class="avatar-overlay"><i class="fas fa-camera"></i></div>
+              </div>
+              <input type="file" id="photo-input" accept="image/*" class="d-none" onchange="handlePhotoUpload(event)" />
+              <p id="student-avatar-hint" style="font-size:.72rem;color:var(--np-text-muted);margin-top:.6rem;">Toca para cambiar foto</p>
+            </div>
+
+            <!-- Form fields -->
+            <div class="mb-3">
+              <label class="np-label">Nombre completo</label>
+              <input class="np-input" type="text" id="p-name" placeholder="Ej: Tomás López" />
+            </div>
+            <div class="mb-3">
+              <label class="np-label">Edad</label>
+              <input class="np-input" type="number" id="p-age" min="1" max="99" placeholder="Ej: 12" />
+            </div>
+            <div class="mb-3">
+              <label class="np-label">Nivel de comunicación</label>
+              <select class="np-input" id="p-communication">
+                <option value="Verbal con apoyo visual">Verbal con apoyo visual</option>
+                <option value="Verbal sin apoyo">Verbal sin apoyo</option>
+                <option value="AAC / Pictogramas">AAC / Pictogramas</option>
+                <option value="No verbal">No verbal</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="np-label">Diagnóstico (opcional)</label>
+              <input class="np-input" type="text" id="p-diagnosis" placeholder="Ej: TEA Nivel 1" />
+            </div>
+
+            <button class="btn-np-save w-100" onclick="saveProfile()">
+              <i class="fas fa-save me-2"></i> Guardar Perfil
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT: Mi Red de Apoyo -->
+        <div class="col-lg-7 fade-in-up delay-2">
+          <div class="np-card p-4 p-md-5">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div class="d-flex align-items-center gap-2" style="color:var(--np-blue);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;">
+                <i class="fas fa-people-group"></i> Mi Red de Apoyo
+              </div>
+              <button class="btn btn-sm fw-bold" onclick="addNetworkMember()" style="border-radius:10px;background:rgba(59,130,246,.1);color:var(--np-blue);border:1px solid rgba(59,130,246,.2);font-size:.75rem;">
+                <i class="fas fa-plus me-1"></i> Agregar
+              </button>
+            </div>
+
+            <!-- Network member list -->
+            <div id="network-list" class="d-flex flex-column gap-3"></div>
+
+            <!-- Roles info -->
+            <div class="mt-4 p-3" style="background:var(--np-blue-soft);border-radius:14px;border:1px solid rgba(59,130,246,.15);">
+              <p style="font-size:.75rem;color:#1e40af;margin:0;line-height:1.6;">
+                <strong>Posibles integrantes:</strong> Madre · Padre · Tutor · Familiar · Docente · Terapeuta
+              </p>
+              <p style="font-size:.72rem;color:#3b82f6;margin:.4rem 0 0;" class="mb-0">
+                <i class="fas fa-info-circle me-1"></i>Docente y Terapeuta disponibles en futuras versiones como roles de acceso completo.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Network Member -->
+<div class="modal fade" id="networkModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--np-card);border:1px solid var(--np-border);border-radius:20px;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-black" id="networkModalTitle">Agregar Integrante</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-3">
+        <input type="hidden" id="nm-id" />
+        <div class="mb-3">
+          <label class="np-label">Nombre completo</label>
+          <input class="np-input" type="text" id="nm-name" placeholder="Ej: María López" />
+        </div>
+        <div class="mb-3">
+          <label class="np-label">Rol</label>
+          <select class="np-input" id="nm-role">
+            <option value="Madre">Madre</option>
+            <option value="Padre">Padre</option>
+            <option value="Tutor">Tutor/a</option>
+            <option value="Familiar">Familiar</option>
+            <option value="Docente">Docente (próximamente)</option>
+            <option value="Terapeuta">Terapeuta (próximamente)</option>
+          </select>
+        </div>
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="nm-active" checked />
+          <label class="form-check-label" for="nm-active" style="font-size:.85rem;font-weight:600;">Integrante activo/a</label>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn fw-bold" data-bs-dismiss="modal" style="border-radius:12px;font-size:.82rem;">Cancelar</button>
+        <button class="btn-np-save" onclick="saveNetworkMember()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="shared.js"></script>
+<script>
+const ROLE_COLORS = {
+  'Madre':'#f43f5e','Padre':'#3b82f6','Tutor':'#a855f7','Familiar':'#10b981',
+  'Docente':'#f97316','Terapeuta':'#0ea5e9',
+};
+const ROLE_ICONS = {
+  'Madre':'fa-person-dress','Padre':'fa-person','Tutor':'fa-user-tie',
+  'Familiar':'fa-people-group','Docente':'fa-chalkboard-user','Terapeuta':'fa-stethoscope',
+};
+let editingMemberId = null;
+let networkModal = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  NP_initSystem();
+  if (!NP_checkSession()) return;
+  NP_applyTheme();
+  NP_updateHeader();
+
+  loadProfileForm();
+  renderNetworkList();
+  networkModal = new bootstrap.Modal(document.getElementById('networkModal'));
+});
+
+function triggerStudentPhotoUpload() {
+  const session = NP_getSession();
+  if (session && session.role === 'cuidador') {
+    document.getElementById('photo-input').click();
+  } else {
+    NP_showToast('Solo los cuidadores administradores pueden actualizar la foto del alumno.', 'warning');
+  }
+}
+
+function loadProfileForm() {
+  const p = NP_getProfile();
+  document.getElementById('p-name').value         = p.name        || '';
+  document.getElementById('p-age').value           = p.age         || '';
+  document.getElementById('p-diagnosis').value     = p.diagnosis   || '';
+  document.getElementById('p-communication').value = p.communication || 'Verbal con apoyo visual';
+
+  const initials = (p.name||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('avatar-initials').textContent = initials;
+
+  if (p.photo) {
+    document.getElementById('avatar-img').src = p.photo;
+    document.getElementById('avatar-img').style.display = 'block';
+    document.getElementById('avatar-initials').style.display = 'none';
+  } else {
+    document.getElementById('avatar-img').style.display = 'none';
+    document.getElementById('avatar-initials').style.display = 'block';
+  }
+
+  // Ajustar permisos de cambio de foto del alumno
+  const session = NP_getSession();
+  const isCaregiver = session && session.role === 'cuidador';
+  const avatarCircle = document.getElementById('student-avatar-circle');
+  if (avatarCircle) {
+    if (isCaregiver) {
+      avatarCircle.style.cursor = 'pointer';
+      avatarCircle.title = 'Cambiar foto';
+      const overlay = avatarCircle.querySelector('.avatar-overlay');
+      if (overlay) overlay.style.display = 'flex';
+    } else {
+      avatarCircle.style.cursor = 'default';
+      avatarCircle.title = '';
+      const overlay = avatarCircle.querySelector('.avatar-overlay');
+      if (overlay) overlay.style.setProperty('display', 'none', 'important');
+    }
+  }
+
+  const hint = document.getElementById('student-avatar-hint');
+  if (hint) {
+    hint.style.display = isCaregiver ? 'block' : 'none';
+  }
+}
+
+function saveProfile() {
+  const p = NP_getProfile();
+  p.name          = document.getElementById('p-name').value.trim() || p.name;
+  p.age           = parseInt(document.getElementById('p-age').value) || p.age;
+  p.diagnosis     = document.getElementById('p-diagnosis').value.trim();
+  p.communication = document.getElementById('p-communication').value;
+  NP_setProfile(p);
+
+  const initials = p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('avatar-initials').textContent = initials;
+  NP_updateHeader();
+  NP_showToast('Perfil guardado correctamente.', 'success');
+}
+
+function handlePhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const p = NP_getProfile();
+    p.photo = ev.target.result;
+    NP_setProfile(p);
+    document.getElementById('avatar-img').src = p.photo;
+    document.getElementById('avatar-img').style.display = 'block';
+    document.getElementById('avatar-initials').style.display = 'none';
+    NP_updateHeader();
+    NP_showToast('Foto de perfil actualizada.', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleCaregiverPhotoUpload(e, id) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const network = NP_getNetwork();
+    const m = network.find(x => x.id === id);
+    if (m) {
+      m.photo = ev.target.result;
+      NP_setNetwork(network);
+      renderNetworkList();
+      NP_updateHeader();
+      NP_showToast('Tu foto de perfil ha sido actualizada.', 'success');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderNetworkList() {
+  const list    = document.getElementById('network-list');
+  const network = NP_getNetwork();
+  list.innerHTML = '';
+  if (!network.length) {
+    list.innerHTML = `<div class="text-center py-4" style="color:var(--np-text-muted);font-size:.85rem;">
+      <i class="fas fa-users-slash mb-2 d-block" style="font-size:1.5rem;"></i>Aún no hay integrantes en la red de apoyo.
+    </div>`;
+    return;
+  }
+  const session = NP_getSession();
+  network.forEach(m => {
+    const color   = ROLE_COLORS[m.role]  || 'var(--np-pink)';
+    const icon    = ROLE_ICONS[m.role]   || 'fa-user';
+    const initials= m.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const isSelf  = session && session.role === 'cuidador' && m.name === session.name;
+
+    const avatarContent = m.photo 
+      ? `<img src="${m.photo}" alt="${m.name}" style="width:100%; height:100%; object-fit:cover; border-radius:16px;" />` 
+      : initials;
+
+    const div = document.createElement('div');
+    div.className = 'network-card';
+    div.innerHTML = `
+      <div class="d-flex align-items-center">
+        <div class="network-avatar" style="background:linear-gradient(135deg,${color},${color}bb); cursor:${isSelf ? 'pointer' : 'default'};" ${isSelf ? `onclick="document.getElementById('caregiver-photo-input-${m.id}').click()"` : ''} title="${isSelf ? 'Toca para cambiar tu foto' : ''}">
+          ${avatarContent}
+          ${isSelf ? `<div class="network-avatar-overlay"><i class="fas fa-camera"></i></div>` : ''}
+        </div>
+        ${isSelf ? `<input type="file" id="caregiver-photo-input-${m.id}" accept="image/*" class="d-none" onchange="handleCaregiverPhotoUpload(event, ${m.id})" />` : ''}
+        <div class="flex-grow-1">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <strong style="font-size:.9rem;">${m.name}</strong>
+            <span class="network-role-badge" style="background:${color}18;color:${color};">
+              <i class="fas ${icon} me-1"></i>${m.role}
+            </span>
+            ${m.active ? '' : '<span class="badge" style="background:#e2e8f0;color:#64748b;font-size:.65rem;">Inactivo</span>'}
+          </div>
+          <div class="d-flex align-items-center gap-1" style="font-size:.72rem;color:var(--np-text-muted);">
+            <i class="fas fa-circle" style="font-size:.35rem;color:${m.active?'var(--np-green)':'#94a3b8'};"></i>
+            ${m.active ? 'Activo en el sistema' : 'No activo actualmente'}
+          </div>
+        </div>
+        <div class="d-flex gap-2 ms-2">
+          <button class="btn btn-sm" onclick="editMember(${m.id})" style="border-radius:10px;background:rgba(59,130,246,.1);color:var(--np-blue);border:none;font-size:.75rem;">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button class="btn btn-sm" onclick="deleteMember(${m.id})" style="border-radius:10px;background:rgba(244,63,94,.1);color:var(--np-pink);border:none;font-size:.75rem;">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function addNetworkMember() {
+  editingMemberId = null;
+  document.getElementById('networkModalTitle').textContent = 'Agregar Integrante';
+  document.getElementById('nm-id').value   = '';
+  document.getElementById('nm-name').value = '';
+  document.getElementById('nm-role').value = 'Madre';
+  document.getElementById('nm-active').checked = true;
+  networkModal.show();
+}
+
+function editMember(id) {
+  editingMemberId = id;
+  const m = NP_getNetwork().find(x=>x.id===id);
+  if (!m) return;
+  document.getElementById('networkModalTitle').textContent = 'Editar Integrante';
+  document.getElementById('nm-id').value     = m.id;
+  document.getElementById('nm-name').value   = m.name;
+  document.getElementById('nm-role').value   = m.role;
+  document.getElementById('nm-active').checked = m.active;
+  networkModal.show();
+}
+
+function saveNetworkMember() {
+  const network = NP_getNetwork();
+  const name    = document.getElementById('nm-name').value.trim();
+  const role    = document.getElementById('nm-role').value;
+  const active  = document.getElementById('nm-active').checked;
+  if (!name) { NP_showToast('Escribe un nombre para el integrante.','error'); return; }
+
+  if (editingMemberId) {
+    const idx = network.findIndex(x=>x.id===editingMemberId);
+    if (idx>-1) { network[idx].name=name; network[idx].role=role; network[idx].active=active; }
+  } else {
+    const newId = network.length ? Math.max(...network.map(x=>x.id))+1 : 1;
+    network.push({ id:newId, name, role, photo:null, active });
+  }
+  NP_setNetwork(network);
+  networkModal.hide();
+  renderNetworkList();
+  NP_showToast('Red de apoyo actualizada.','success');
+}
+
+function deleteMember(id) {
+  let network = NP_getNetwork().filter(x=>x.id!==id);
+  NP_setNetwork(network);
+  renderNetworkList();
+  NP_showToast('Integrante eliminado.','info');
+}
+</script>
+</body>
+</html>

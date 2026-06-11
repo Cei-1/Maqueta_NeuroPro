@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="manifest" href="manifest.json" />
+  <title>NeuroPro — Indicadores y Evolución</title>
+  <meta name="description" content="Historial de registros, evolución semanal y mensual, y tendencia de progreso de autonomía funcional." />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{--np-pink:#f43f5e;--np-pink-hover:#e11d48;--np-pink-soft:#fff1f2;--np-blue:#3b82f6;--np-blue-soft:#eff6ff;--np-purple:#a855f7;--np-green:#10b981;--np-orange:#f97316;--np-bg:#f8fafc;--np-card:#ffffff;--np-sidebar:#ffffff;--np-border:#e2e8f0;--np-text:#0f172a;--np-text-muted:#64748b;--np-shadow:0 4px 24px rgba(0,0,0,.07);}
+    [data-bs-theme="dark"]{--np-bg:#090d16;--np-card:#111827;--np-sidebar:#0b111e;--np-border:#1e293b;--np-text:#f1f5f9;--np-text-muted:#94a3b8;--np-shadow:0 4px 24px rgba(0,0,0,.4);}
+    body{font-family:'Inter',sans-serif;background:var(--np-bg);color:var(--np-text);transition:background .3s,color .3s;}
+    ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px;}
+    [data-bs-theme="dark"] ::-webkit-scrollbar-thumb{background:#1f2937;}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .fade-in-up{animation:fadeInUp .4s ease-out both;}.delay-1{animation-delay:.08s;}.delay-2{animation-delay:.16s;}.delay-3{animation-delay:.24s;}
+    /* Sidebar */
+    .np-sidebar{width:72px;min-height:100vh;background:var(--np-sidebar);border-right:1px solid var(--np-border);display:flex;flex-direction:column;align-items:center;padding:1.25rem .75rem;gap:0;position:fixed;top:0;left:0;z-index:200;box-shadow:2px 0 12px rgba(0,0,0,.05);user-select:none;}
+    .np-sidebar *{user-select:none;}
+    .np-sidebar .nav-btn{width:44px;height:44px;border-radius:14px;border:none;display:flex;align-items:center;justify-content:center;font-size:.95rem;margin-bottom:.6rem;transition:all .2s;color:var(--np-text-muted);background:transparent;position:relative;}
+    .np-sidebar .nav-btn:hover{background:var(--np-pink-soft);color:var(--np-pink);transform:scale(1.08);}
+    .np-sidebar .nav-btn.active{background:var(--np-pink);color:#fff;box-shadow:0 4px 12px rgba(244,63,94,.3);}
+    [data-bs-theme="dark"] .np-sidebar .nav-btn:hover{background:rgba(244,63,94,.12);}
+    .np-sidebar .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:.6rem;}
+    .np-sidebar .btn-theme-sb{width:38px;height:38px;border-radius:12px;border:1px solid var(--np-border);background:var(--np-card);color:var(--np-text-muted);display:flex;align-items:center;justify-content:center;transition:all .2s;cursor:pointer;}
+    .np-sidebar .btn-theme-sb:hover{transform:scale(1.1);}
+    .np-sidebar .avatar-pill{width:38px;height:38px;border-radius:12px;border:1px solid var(--np-border);background:var(--np-pink-soft);color:var(--np-pink);font-weight:800;font-size:.7rem;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:all .2s;padding:0;overflow:hidden;}
+    .np-sidebar .avatar-pill:hover{transform:scale(1.08);background:var(--np-pink-soft);color:var(--np-pink);}
+    .np-sidebar .avatar-pill.active{background:var(--np-pink);color:#fff;box-shadow:0 4px 12px rgba(244,63,94,.3);border-color:var(--np-pink);}
+    .sidebar-tooltip{position:absolute;left:56px;background:#1e293b;color:#fff;border-radius:8px;padding:.25rem .65rem;font-size:.72rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:300;}
+    .nav-btn:hover .sidebar-tooltip{opacity:1;}
+    .np-main{margin-left:72px;min-height:100vh;}
+    .np-header{background:var(--np-card);border-bottom:1px solid var(--np-border);padding:.9rem 1.75rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+    .np-header-img{max-height:52px;object-fit:contain;}
+    .np-card{background:var(--np-card);border:1px solid var(--np-border);border-radius:20px;box-shadow:var(--np-shadow);}
+    #toast-container{position:fixed;top:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none;}
+    #toast-container .toast{pointer-events:auto;}
+    .np-pill{border-radius:999px;padding:.3rem .85rem;font-size:.72rem;font-weight:700;display:inline-flex;align-items:center;gap:.4rem;}
+    .np-input{background:var(--np-bg);border:1.5px solid var(--np-border);border-radius:12px;padding:.55rem .9rem;font-size:.82rem;color:var(--np-text);font-family:'Inter',sans-serif;transition:border-color .2s;}
+    .np-input:focus{outline:none;border-color:var(--np-purple);box-shadow:0 0 0 3px rgba(168,85,247,.1);}
+
+    /* Stat cards */
+    .stat-card{background:var(--np-card);border:1px solid var(--np-border);border-radius:18px;padding:1.25rem;box-shadow:var(--np-shadow);}
+    .stat-card .stat-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.85rem;}
+    .stat-card .stat-val{font-size:1.6rem;font-weight:900;line-height:1;}
+    .stat-card .stat-lbl{font-size:.68rem;color:var(--np-text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:.25rem;}
+
+    /* Bar chart */
+    .bar-chart-wrap{
+      display:flex;
+      align-items:flex-end;
+      gap:12px;
+      height:220px;
+      padding:24px 0 0 0;
+      overflow-x:auto;
+      scrollbar-width:thin;
+    }
+    .bar-item{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      flex:1;
+      min-width:44px;
+      flex-shrink:0;
+      gap:4px;
+    }
+    .bar-col{width:100%;border-radius:8px 8px 0 0;transition:height .6s ease;min-height:4px;position:relative;}
+    .bar-col:hover::after{content:attr(data-tip);position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;border-radius:6px;padding:.15rem .5rem;font-size:.65rem;white-space:nowrap;pointer-events:none;z-index:10;}
+    .bar-label{font-size:.62rem;color:var(--np-text-muted);font-weight:600;text-align:center;word-break:break-all;}
+    .bar-val{font-size:.65rem;font-weight:800;color:var(--np-text-muted);}
+
+    /* History table */
+    .np-table th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--np-text-muted);font-weight:700;border:none;padding:.7rem 1rem;background:transparent;}
+    .np-table td{font-size:.8rem;padding:.7rem 1rem;border-color:var(--np-border);color:var(--np-text);vertical-align:middle;}
+    .np-table tbody tr{border-color:var(--np-border);transition:background .15s;}
+    .np-table tbody tr:hover{background:rgba(168,85,247,.04);}
+
+    /* Progress bars */
+    .pct-bar-wrap{background:rgba(0,0,0,.06);border-radius:999px;height:8px;overflow:hidden;min-width:80px;}
+    [data-bs-theme="dark"] .pct-bar-wrap{background:rgba(255,255,255,.08);}
+    .pct-bar{height:100%;border-radius:999px;transition:width .6s ease;}
+
+    /* Ring */
+    .ring-svg{transform:rotate(-90deg);}
+    .ring-bg{stroke:rgba(0,0,0,.06);fill:none;}
+    [data-bs-theme="dark"] .ring-bg{stroke:rgba(255,255,255,.08);}
+    .ring-fill{fill:none;stroke-linecap:round;transition:stroke-dashoffset .8s ease;}
+
+
+    @media(max-width:768px){
+      .np-sidebar{
+        width:100%; min-height:auto; height:62px;
+        flex-direction:row; border-right:none;
+        border-top:1px solid var(--np-border);
+        position:fixed; bottom:0; left:0; top:auto;
+        padding:.5rem 1rem; z-index:300;
+        background:var(--np-sidebar);
+        box-shadow:0 -2px 12px rgba(0,0,0,.1);
+        justify-content:space-around;
+      }
+      .np-sidebar .nav-btn{margin-bottom:0; margin-right:0; width:48px; height:48px;}
+      .np-sidebar .sidebar-bottom{flex-direction:row; margin-top:0; margin-left:0; gap:.4rem;}
+      .np-main{margin-left:0; padding-bottom:72px !important;}
+      .sidebar-tooltip{display:none;}
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="d-flex flex-column flex-md-row">
+
+  <!-- Sidebar -->
+  <nav class="np-sidebar">
+    <button class="nav-btn" onclick="window.location.href='dashboard.html'" title="Panel"><i class="fas fa-house"></i><span class="sidebar-tooltip">Panel Principal</span></button>
+    <button class="nav-btn" onclick="window.location.href='actividades.html'" title="Actividades"><i class="fas fa-list-check"></i><span class="sidebar-tooltip">Actividades</span></button>
+    <button class="nav-btn" onclick="window.location.href='agenda.html'" title="Agenda"><i class="fas fa-calendar-check"></i><span class="sidebar-tooltip">Agenda de Tareas</span></button>
+    <button class="nav-btn active" title="Indicadores"><i class="fas fa-chart-line"></i><span class="sidebar-tooltip">Indicadores</span></button>
+    <button class="nav-btn" onclick="window.location.href='alumno.html'" title="Vista Alumno"><i class="fas fa-child-reaching"></i><span class="sidebar-tooltip">Vista del Alumno</span></button>
+    <div class="sidebar-bottom">
+      <button class="btn-theme-sb border-0" onclick="NP_toggleTheme()"><i id="theme-icon" class="fas fa-moon" style="font-size:.85rem;"></i></button>
+      <button class="avatar-pill" id="sidebar-avatar" onclick="window.location.href='perfil.html'" title="Configurar Perfil">CC</button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="np-main flex-grow-1">
+    <header class="np-header">
+      <img src="encabezado.png" alt="NeuroPro" class="np-header-img" />
+      <div class="d-flex align-items-center gap-3">
+        <span id="session-badge" class="np-pill" style="background:rgba(168,85,247,.1);color:var(--np-purple);">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--np-purple);"></span> Cargando…
+        </span>
+        <button id="btn-logout" onclick="NP_logout()" class="btn btn-sm fw-bold" style="border-radius:10px;background:rgba(168,85,247,.08);color:var(--np-purple);border:1px solid rgba(168,85,247,.2);font-size:.75rem;display:none;">
+          <i class="fas fa-right-from-bracket me-1"></i> Salir
+        </button>
+      </div>
+    </header>
+
+    <div class="p-4 p-md-5" style="max-width:1300px;margin:0 auto;">
+
+      <!-- Title -->
+      <div class="mb-5 fade-in-up">
+        <div class="d-flex align-items-center gap-2 mb-1" style="color:var(--np-purple);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;">
+          <i class="fas fa-chart-line"></i> Indicadores del Sistema
+        </div>
+        <h2 class="fw-black mb-1" style="font-size:1.6rem;">Evolución y Tendencia de Progreso</h2>
+        <p style="color:var(--np-text-muted);font-size:.85rem;margin:0;">Historial de registros, evolución semanal y mensual, y tendencia de independencia funcional.</p>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="row g-3 mb-5 fade-in-up delay-1">
+        <div class="col-6 col-lg-3">
+          <div class="stat-card text-center">
+            <div class="stat-icon mx-auto" style="background:rgba(168,85,247,.1);"><i class="fas fa-trophy" style="color:var(--np-purple);"></i></div>
+            <div class="stat-val" style="color:var(--np-purple);" id="kpi-global">—</div>
+            <div class="stat-lbl">% Global</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card text-center">
+            <div class="stat-icon mx-auto" style="background:rgba(16,185,129,.1);"><i class="fas fa-arrow-trend-up" style="color:var(--np-green);"></i></div>
+            <div class="stat-val" style="color:var(--np-green);" id="kpi-best">—</div>
+            <div class="stat-lbl">Mejor Actividad</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card text-center">
+            <div class="stat-icon mx-auto" style="background:rgba(59,130,246,.1);"><i class="fas fa-calendar" style="color:var(--np-blue);"></i></div>
+            <div class="stat-val" style="color:var(--np-blue);" id="kpi-sessions">—</div>
+            <div class="stat-lbl">Sesiones Totales</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card text-center">
+            <div class="stat-icon mx-auto" style="background:rgba(249,115,22,.1);"><i class="fas fa-bolt" style="color:var(--np-orange);"></i></div>
+            <div class="stat-val" style="color:var(--np-orange);" id="kpi-improvement">—</div>
+            <div class="stat-lbl">Mejora Promedio</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart + ring row -->
+      <div class="row g-4 mb-5">
+
+        <!-- Evolution bar chart -->
+        <div class="col-lg-8 fade-in-up delay-1">
+          <div class="np-card p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);">
+                <i class="fas fa-chart-bar me-1" style="color:var(--np-purple);"></i> Evolución por Actividad
+              </div>
+              <div class="d-flex gap-2">
+                <select id="chart-filter" class="np-input" style="width:auto;padding:.35rem .75rem;font-size:.72rem;" onchange="renderBarChart()">
+                  <option value="all">Todas las categorías</option>
+                  <option value="Vida Diaria">🧼 Vida Diaria</option>
+                  <option value="Rutina Escolar">🎒 Escolar</option>
+                  <option value="Regulación Emocional">🌬️ Regulación</option>
+                  <option value="Actividades Sociales">🤝 Sociales</option>
+                </select>
+              </div>
+            </div>
+            <!-- Bar chart -->
+            <div id="bar-chart" class="bar-chart-wrap"></div>
+            <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
+              <div class="d-flex align-items-center gap-1"><div style="width:12px;height:12px;border-radius:3px;background:var(--np-purple);"></div><span style="font-size:.68rem;color:var(--np-text-muted);">Promedio Actual</span></div>
+              <div class="d-flex align-items-center gap-1"><div style="width:12px;height:12px;border-radius:3px;background:rgba(168,85,247,.25);"></div><span style="font-size:.68rem;color:var(--np-text-muted);">Promedio Anterior</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Global ring -->
+        <div class="col-lg-4 fade-in-up delay-2">
+          <div class="np-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center">
+            <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);margin-bottom:1.25rem;">
+              <i class="fas fa-chart-pie me-1" style="color:var(--np-purple);"></i> Independencia Global
+            </div>
+            <div style="position:relative;width:140px;height:140px;margin:0 auto 1.25rem;">
+              <svg width="140" height="140" class="ring-svg">
+                <circle class="ring-bg" cx="70" cy="70" r="58" stroke-width="10"/>
+                <circle class="ring-fill" id="global-ring" cx="70" cy="70" r="58" stroke-width="10"
+                  stroke="var(--np-purple)" stroke-dasharray="364.4" stroke-dashoffset="364.4"/>
+              </svg>
+              <span id="global-pct-text" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.5rem;font-weight:900;color:var(--np-purple);">0%</span>
+            </div>
+            <blockquote style="font-size:.78rem;font-style:italic;border-left:3px solid var(--np-purple);padding-left:.75rem;text-align:left;color:var(--np-text-muted);">
+              "¿Es más independiente hoy que hace un mes?"
+            </blockquote>
+            <div id="global-trend" class="mt-2" style="font-size:.8rem;font-weight:700;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-skill indicators -->
+      <div class="np-card p-4 mb-5 fade-in-up delay-2">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+          <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);">
+            <i class="fas fa-star me-1" style="color:var(--np-pink);"></i> Indicadores por Actividad
+          </div>
+          <select id="ind-category-filter" class="np-input" style="width:auto;padding:.35rem .75rem;font-size:.72rem;" onchange="filterIndicators(this.value)">
+            <option value="all">📂 Todas las categorías</option>
+            <option value="Vida Diaria">🧼 Vida Diaria</option>
+            <option value="Rutina Escolar">🎒 Escolar</option>
+            <option value="Regulación Emocional">🌬️ Regulación</option>
+            <option value="Actividades Sociales">🤝 Sociales</option>
+          </select>
+        </div>
+        <div class="table-responsive">
+          <table class="table np-table mb-0">
+            <thead>
+              <tr>
+                <th>Actividad</th>
+                <th>Promedio Actual</th>
+                <th>Promedio Anterior</th>
+                <th>Sesiones</th>
+                <th>Tendencia</th>
+              </tr>
+            </thead>
+            <tbody id="indicators-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- History log -->
+      <div class="np-card p-4 fade-in-up delay-3">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+          <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);">
+            <i class="fas fa-clock-rotate-left me-1" style="color:var(--np-blue);"></i> Historial Completo de Registros
+          </div>
+          <span id="history-count" class="np-pill" style="background:rgba(59,130,246,.1);color:var(--np-blue);">0 registros</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table np-table mb-0">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Actividad</th>
+                <th>Obtenido</th>
+                <th>Máximo</th>
+                <th>% Independencia</th>
+                <th>Cuidador</th>
+                <th>Tendencia</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody id="history-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="shared.js"></script>
+<script>
+let indicatorCategory = 'all';
+let execModal;
+
+document.addEventListener('DOMContentLoaded', () => {
+  NP_initSystem();
+  if (!NP_checkSession()) return;
+  NP_applyTheme();
+  NP_updateHeader();
+
+  execModal = new bootstrap.Modal(document.getElementById('execModal'));
+
+  renderAll();
+});
+
+function renderAll() {
+  renderKPIs();
+  renderBarChart();
+  renderGlobalRing();
+  renderIndicatorsTable();
+  renderHistoryTable();
+}
+
+function renderKPIs() {
+  const routines = NP_getRoutines();
+  const history  = NP_getHistory();
+
+  // Global
+  const globalScore = NP_getGlobalScore();
+  document.getElementById('kpi-global').textContent = globalScore + '%';
+  document.getElementById('kpi-sessions').textContent = history.length;
+
+  // Best skill
+  let bestKey = null; let bestPct = -1;
+  Object.keys(routines).forEach(k => {
+    const p = NP_calcIndependence(k).percentage;
+    if (p > bestPct) { bestPct=p; bestKey=k; }
+  });
+  document.getElementById('kpi-best').textContent = bestKey ? routines[bestKey].icon + ' ' + bestPct + '%' : '—';
+
+  // Average improvement
+  let improvements = [];
+  Object.keys(routines).forEach(k => {
+    const baseline = routines[k].baselineAutonomy || 0;
+    const current  = NP_calcIndependence(k).percentage;
+    improvements.push(current - baseline);
+  });
+  const avgImp = improvements.length ? improvements.reduce((a,b)=>a+b,0)/improvements.length : 0;
+  const kpiImp = document.getElementById('kpi-improvement');
+  kpiImp.textContent = (avgImp >= 0 ? '+' : '') + avgImp.toFixed(1) + '%';
+  kpiImp.style.color  = avgImp>0?'var(--np-green)':avgImp<0?'var(--np-pink)':'var(--np-orange)';
+}
+
+function renderBarChart() {
+  const chart    = document.getElementById('bar-chart');
+  const routines = NP_getRoutines();
+  const catFilter = document.getElementById('chart-filter').value;
+  chart.innerHTML = '';
+
+  const keys = Object.keys(routines).filter(k => catFilter==='all' || routines[k].category===catFilter);
+  const maxH = 150;
+
+  keys.forEach(key => {
+    const r    = routines[key];
+    const pct  = NP_calcIndependence(key).percentage;
+    const base = r.baselineAutonomy || 0;
+    const hCur = Math.max((pct/100)*maxH, 4);
+    const hBase= Math.max((base/100)*maxH, 4);
+    const color = pct>=75?'var(--np-green)':pct>=50?'var(--np-orange)':'var(--np-pink)';
+
+    const item = document.createElement('div');
+    item.className = 'bar-item';
+    item.innerHTML = `
+      <div class="bar-val">${pct}%</div>
+      <div style="display:flex;align-items:flex-end;gap:2px;height:${maxH}px;">
+        <div class="bar-col" style="background:${color};height:${hCur}px;min-width:14px;flex:1;" data-tip="${r.name}: ${pct}%"></div>
+        <div class="bar-col" style="background:rgba(168,85,247,.25);height:${hBase}px;min-width:8px;" data-tip="Anterior: ${base}%"></div>
+      </div>
+      <div class="bar-label" style="max-width:48px;">${r.icon}</div>`;
+    chart.appendChild(item);
+  });
+}
+
+function renderGlobalRing() {
+  const globalScore = NP_getGlobalScore();
+  document.getElementById('global-pct-text').textContent = globalScore + '%';
+  const circ   = 2*Math.PI*58;
+  const offset = circ-(globalScore/100)*circ;
+  const ring   = document.getElementById('global-ring');
+  ring.style.strokeDasharray  = circ;
+  setTimeout(()=>{ ring.style.strokeDashoffset = offset; }, 200);
+
+  const routines = NP_getRoutines();
+  let baseAvg = 0;
+  const keys = Object.keys(routines);
+  keys.forEach(k=>{ baseAvg += (routines[k].baselineAutonomy||0); });
+  baseAvg = keys.length ? baseAvg/keys.length : 0;
+  const diff = globalScore - baseAvg;
+  const trendEl = document.getElementById('global-trend');
+  if (diff>0) trendEl.innerHTML=`<span style="color:var(--np-green);"><i class="fas fa-arrow-trend-up me-1"></i>+${diff.toFixed(1)}% vs promedio anterior</span>`;
+  else if(diff<0) trendEl.innerHTML=`<span style="color:var(--np-pink);"><i class="fas fa-arrow-trend-down me-1"></i>${diff.toFixed(1)}% vs promedio anterior</span>`;
+  else trendEl.innerHTML=`<span style="color:var(--np-text-muted);"><i class="fas fa-minus me-1"></i>Sin cambio vs promedio anterior</span>`;
+}
+
+function filterIndicators(cat) {
+  indicatorCategory = cat;
+  renderIndicatorsTable();
+}
+
+function renderIndicatorsTable() {
+  const tbody    = document.getElementById('indicators-table');
+  const routines = NP_getRoutines();
+  const history  = NP_getHistory();
+  tbody.innerHTML = '';
+
+  Object.keys(routines).forEach(key => {
+    const r = routines[key];
+    if (indicatorCategory!=='all' && r.category!==indicatorCategory) return;
+
+    const pct      = NP_calcIndependence(key).percentage;
+    const base     = r.baselineAutonomy || 0;
+    const diff     = pct - base;
+    const sessions = history.filter(h=>h.skill===key).length;
+    const pctColor = pct>=75?'var(--np-green)':pct>=50?'var(--np-orange)':'var(--np-pink)';
+
+    let trendHtml;
+    if (diff>0) trendHtml=`<span style="color:var(--np-green);font-weight:700;font-size:.75rem;"><i class="fas fa-arrow-up me-1"></i>+${diff.toFixed(1)}%</span>`;
+    else if(diff<0) trendHtml=`<span style="color:var(--np-pink);font-weight:700;font-size:.75rem;"><i class="fas fa-arrow-down me-1"></i>${diff.toFixed(1)}%</span>`;
+    else trendHtml=`<span style="color:var(--np-text-muted);font-weight:600;font-size:.75rem;"><i class="fas fa-minus me-1"></i>Sin cambio</span>`;
+
+    tbody.innerHTML += `
+      <tr>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <span style="font-size:1.1rem;">${r.icon}</span>
+            <span class="fw-semibold" style="font-size:.82rem;">${r.name}</span>
+          </div>
+        </td>
+        <td>
+          <span style="font-size:.9rem;font-weight:800;color:${pctColor};">${pct}%</span>
+        </td>
+        <td>
+          <span style="font-size:.8rem;color:var(--np-text-muted);">${base}%</span>
+        </td>
+        <td><span style="font-size:.78rem;color:var(--np-text-muted);">${sessions}</span></td>
+        <td>${trendHtml}</td>
+      </tr>`;
+  });
+}
+
+function renderHistoryTable() {
+  const tbody   = document.getElementById('history-table');
+  const history = NP_getHistory().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const routines= NP_getRoutines();
+
+  document.getElementById('history-count').textContent = history.length + ' registros';
+  tbody.innerHTML = '';
+
+  if (!history.length) {
+    tbody.innerHTML=`<tr><td colspan="8" class="text-center py-4" style="color:var(--np-text-muted);">
+      Sin registros. <a href="agenda.html" style="color:var(--np-purple);">Ir a la Agenda para calificar</a>
+    </td></tr>`;
+    return;
+  }
+
+  history.forEach((item, idx) => {
+    const r = routines[item.skill];
+    const name = r ? `${r.icon} ${r.name}` : item.skill;
+    const pctColor = item.score>=75?'var(--np-green)':item.score>=50?'var(--np-orange)':'var(--np-pink)';
+
+    // Find previous session for this skill
+    const prevItems = history.slice(idx+1).filter(h=>h.skill===item.skill);
+    let trendHtml = `<span style="color:var(--np-text-muted);font-size:.72rem;">—</span>`;
+    if (prevItems.length) {
+      const diff = item.score - prevItems[0].score;
+      if (diff>0) trendHtml=`<span style="color:var(--np-green);font-size:.72rem;font-weight:700;"><i class="fas fa-arrow-up me-1"></i>+${diff.toFixed(1)}%</span>`;
+      else if(diff<0) trendHtml=`<span style="color:var(--np-pink);font-size:.72rem;font-weight:700;"><i class="fas fa-arrow-down me-1"></i>${diff.toFixed(1)}%</span>`;
+      else trendHtml=`<span style="color:var(--np-text-muted);font-size:.72rem;"><i class="fas fa-minus me-1"></i>Sin cambio</span>`;
+    }
+
+    // Try to find detailed execution
+    const exec = NP_getExecutions().find(e => e.date === item.date && e.skillKey === item.skill && Math.abs(e.score - item.score) < 0.01);
+    let actionHtml = '';
+    if (exec) {
+      actionHtml = `
+        <button class="btn btn-sm btn-link p-0 fw-bold text-decoration-none" style="color:var(--np-purple);" onclick="showExecDetail('${exec.id}')">
+          <i class="fas fa-eye me-1"></i>Ver
+        </button>`;
+    } else {
+      actionHtml = `
+        <button class="btn btn-sm btn-link p-0 fw-bold text-decoration-none" style="color:var(--np-text-muted);" onclick="showLegacyDetail('${item.skill}', '${item.date}', ${item.score}, '${item.caregiver}')">
+          <i class="fas fa-eye me-1"></i>Ver
+        </button>`;
+    }
+
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-size:.75rem;font-weight:600;">${NP_formatDate(item.date)}</td>
+        <td class="fw-semibold" style="font-size:.8rem;">${name}</td>
+        <td style="font-size:.8rem;">${item.obtained !== undefined ? item.obtained.toFixed(2) : '—'}</td>
+        <td style="font-size:.8rem;">${item.max}</td>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <div class="pct-bar-wrap" style="width:70px;">
+              <div class="pct-bar" style="width:${item.score}%;background:${pctColor};"></div>
+            </div>
+            <span style="font-weight:800;color:${pctColor};font-size:.8rem;">${item.score}%</span>
+          </div>
+        </td>
+        <td style="font-size:.75rem;color:var(--np-text-muted);">${item.caregiver}</td>
+        <td>${trendHtml}</td>
+        <td>${actionHtml}</td>
+      </tr>`;
+  });
+}
+
+function showExecDetail(execId) {
+  const exec  = NP_getExecutions().find(e => e.id === execId);
+  if (!exec) return;
+  const r = NP_getRoutines()[exec.skillKey];
+
+  document.getElementById('execModalTitle').textContent = `${r?r.icon:''} ${r?r.name:exec.skillKey} — ${NP_formatDate(exec.date)} ${exec.time || ''}`;
+  const pctColor = exec.score>=75?'var(--np-green)':exec.score>=50?'var(--np-orange)':'var(--np-pink)';
+
+  document.getElementById('exec-modal-body').innerHTML = `
+    <!-- Summary -->
+    <div class="d-flex align-items-center gap-4 mb-4 p-3" style="background:var(--np-bg);border-radius:14px;">
+      <div style="text-align:center;">
+        <div style="font-size:1.6rem;font-weight:900;color:${pctColor};">${exec.score}%</div>
+        <div style="font-size:.65rem;color:var(--np-text-muted);text-transform:uppercase;">Independencia</div>
+      </div>
+      <div>
+        <div style="font-size:.72rem;color:var(--np-text-muted);">
+          <strong>Cuidador:</strong> ${exec.caregiver || '—'} &nbsp;·&nbsp;
+          <strong>Por el alumno:</strong> ${exec.completedByStudent ? '✅ Sí' : '—'} &nbsp;·&nbsp;
+          <strong>Fórmula:</strong> ${exec.obtained?.toFixed(2)} ÷ ${exec.max} = ${exec.score}%
+        </div>
+        <div style="background:rgba(0,0,0,.06);border-radius:999px;height:8px;margin-top:.5rem;overflow:hidden;width:150px;">
+          <div style="width:${exec.score}%;background:${pctColor};height:100%;border-radius:999px;"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Steps -->
+    <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--np-text-muted);margin-bottom:.75rem;">
+      <i class="fas fa-list-ol me-1" style="color:var(--np-purple);"></i> Detalle por Pictograma
+    </div>
+    <div class="d-flex flex-column gap-2">
+      ${exec.steps.map((s,i) => {
+        const c = NP_SUPPORT_COLORS[s.level]||'#64748b';
+        return `
+          <div class="d-flex align-items-center gap-3 p-2" style="background:var(--np-bg);border-radius:12px;border:1.5px solid ${c}33;">
+            <div style="width:28px;height:28px;border-radius:999px;background:${c};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0;">${i+1}</div>
+            <span style="font-size:1.2rem;">${s.icon||'📌'}</span>
+            <div class="flex-grow-1">
+              <div style="font-size:.82rem;font-weight:700;">${s.text}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-size:.72rem;font-weight:800;color:${c};background:${c}18;padding:.2rem .65rem;border-radius:999px;">${s.label}</div>
+              <div style="font-size:.65rem;color:var(--np-text-muted);margin-top:.15rem;">${s.value?.toFixed(2)} pts</div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+
+  execModal.show();
+}
+
+function showLegacyDetail(skillKey, date, score, caregiver) {
+  const r = NP_getRoutines()[skillKey];
+  document.getElementById('execModalTitle').textContent = `${r?r.icon:''} ${r?r.name:skillKey} — ${NP_formatDate(date)} (Histórico)`;
+  const pctColor = score>=75?'var(--np-green)':score>=50?'var(--np-orange)':'var(--np-pink)';
+
+  document.getElementById('exec-modal-body').innerHTML = `
+    <div class="d-flex align-items-center gap-4 mb-4 p-3" style="background:var(--np-bg);border-radius:14px;">
+      <div style="text-align:center;">
+        <div style="font-size:1.6rem;font-weight:900;color:${pctColor};">${score}%</div>
+        <div style="font-size:.65rem;color:var(--np-text-muted);text-transform:uppercase;">Independencia</div>
+      </div>
+      <div>
+        <div style="font-size:.72rem;color:var(--np-text-muted);">
+          <strong>Cuidador:</strong> ${caregiver || '—'} &nbsp;·&nbsp;
+          <strong>Registro legacy:</strong> Sí
+        </div>
+        <div style="background:rgba(0,0,0,.06);border-radius:999px;height:8px;margin-top:.5rem;overflow:hidden;width:150px;">
+          <div style="width:${score}%;background:${pctColor};height:100%;border-radius:999px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-info py-2 px-3 small border-0" style="border-radius:12px;">
+      <i class="fas fa-info-circle me-1"></i> Este registro se realizó antes de la actualización de NeuroPro. El detalle de apoyo paso a paso por pictograma no está disponible para esta sesión.
+    </div>
+  `;
+  execModal.show();
+}
+</script>
+<!-- Modal: Detailed Execution -->
+<div class="modal fade" id="execModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="background:var(--np-card);border:1px solid var(--np-border);border-radius:24px;">
+      <div class="modal-header border-0 pb-0 pt-4 px-4">
+        <h5 class="modal-title fw-black fs-5" id="execModalTitle">Detalle de Ejecución</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body px-4 pb-4" id="exec-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

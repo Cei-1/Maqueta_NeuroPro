@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="manifest" href="manifest.json" />
+  <title>NeuroPro 2026 — Inicio de Sesión</title>
+  <meta name="description" content="NeuroPro: Plataforma de autonomía funcional para personas con TEA y TDAH mediante secuencias visuales y medición de independencia." />
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --np-pink:        #f43f5e;
+      --np-pink-hover:  #e11d48;
+      --np-pink-soft:   #fff1f2;
+      --np-blue:        #3b82f6;
+      --np-blue-soft:   #eff6ff;
+      --np-purple:      #a855f7;
+      --np-green:       #10b981;
+      --np-orange:      #f97316;
+      --np-bg:          #f8fafc;
+      --np-card:        #ffffff;
+      --np-sidebar:     #ffffff;
+      --np-border:      #e2e8f0;
+      --np-text:        #0f172a;
+      --np-text-muted:  #64748b;
+      --np-shadow:      0 4px 24px rgba(0,0,0,.07);
+    }
+    [data-bs-theme="dark"] {
+      --np-bg:          #090d16;
+      --np-card:        #111827;
+      --np-sidebar:     #0b111e;
+      --np-border:      #1e293b;
+      --np-text:        #f1f5f9;
+      --np-text-muted:  #94a3b8;
+      --np-shadow:      0 4px 24px rgba(0,0,0,.4);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--np-bg);
+      color: var(--np-text);
+      min-height: 100vh;
+      transition: background .3s, color .3s;
+    }
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:10px; }
+    [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background:#1f2937; }
+
+    /* ── Animations ── */
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes float {
+      0%,100% { transform:translateY(0); }
+      50%     { transform:translateY(-8px); }
+    }
+    .fade-in-up { animation:fadeInUp .5s ease-out both; }
+    .delay-1    { animation-delay:.1s; }
+    .delay-2    { animation-delay:.2s; }
+    .delay-3    { animation-delay:.3s; }
+    .delay-4    { animation-delay:.4s; }
+
+    /* ── NP Card ── */
+    .np-card {
+      background: var(--np-card);
+      border: 1px solid var(--np-border);
+      border-radius: 24px;
+      box-shadow: var(--np-shadow);
+    }
+    .np-input{background:var(--np-bg);border:1.5px solid var(--np-border);border-radius:12px;padding:.6rem 1rem;font-size:.85rem;color:var(--np-text);font-family:'Inter',sans-serif;width:100%;transition:border-color .2s,box-shadow .2s;}
+    .np-input:focus{outline:none;border-color:var(--np-pink);box-shadow:0 0 0 3px rgba(244,63,94,.1);}
+    .np-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--np-text-muted);margin-bottom:.4rem;display:block;}
+    .btn-np-save{background:linear-gradient(135deg,var(--np-pink),var(--np-purple));color:#fff;border:none;border-radius:14px;padding:.7rem 1.75rem;font-weight:800;font-size:.85rem;transition:all .2s;box-shadow:0 4px 14px rgba(244,63,94,.3);}
+    .btn-np-save:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(244,63,94,.4);color:#fff;}
+
+    /* ── Role Card ── */
+    .role-card {
+      background: var(--np-card);
+      border: 2px solid var(--np-border);
+      border-radius: 28px;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all .25s ease;
+      text-align: left;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .role-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,.12); }
+    .role-card.role-cuidador:hover { border-color: var(--np-pink); }
+    .role-card.role-alumno:hover   { border-color: var(--np-blue); }
+    .role-card .role-icon {
+      width:64px; height:64px; border-radius:18px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.8rem; margin-bottom:1.25rem;
+    }
+    .role-card .role-icon.pink { background:rgba(244,63,94,.12); }
+    .role-card .role-icon.blue { background:rgba(59,130,246,.12); }
+    .role-card .role-title { font-size:1.1rem; font-weight:800; margin-bottom:.4rem; color:var(--np-text); }
+    .role-card .role-desc  { font-size:.8rem; color:var(--np-text-muted); line-height:1.6; }
+    .role-card .role-cta   { font-size:.75rem; font-weight:700; display:inline-flex; align-items:center; gap:.35rem; margin-top:1rem; }
+
+    /* ── Header encabezado ── */
+    .np-header-img { max-height:70px; object-fit:contain; }
+
+    /* ── Theme toggle ── */
+    .btn-theme {
+      background: var(--np-card); border:1px solid var(--np-border);
+      border-radius:12px; width:40px; height:40px;
+      display:flex; align-items:center; justify-content:center;
+      color:var(--np-text-muted); transition:all .2s;
+    }
+    .btn-theme:hover { transform:scale(1.1); }
+
+    /* ── Alert card ── */
+    .np-alert {
+      background: var(--np-pink-soft); border-left:4px solid var(--np-pink);
+      border-radius:14px; padding:1rem 1.25rem;
+      font-size:.82rem; color:#be185d; line-height:1.6;
+    }
+    [data-bs-theme="dark"] .np-alert { background:rgba(244,63,94,.08); color:#fb7185; }
+
+    /* ── Toast ── */
+    #toast-container {
+      position:fixed; top:1.5rem; right:1.5rem; z-index:9999;
+      display:flex; flex-direction:column; gap:.5rem; pointer-events:none;
+    }
+    #toast-container .toast { pointer-events:auto; }
+
+    /* ── Gradient text ── */
+    .np-brand {
+      font-weight:900; letter-spacing:.1em;
+      background:linear-gradient(135deg, var(--np-pink), var(--np-purple), var(--np-blue));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+
+    /* ── Decorative orbs ── */
+    .orb {
+      position:absolute; border-radius:50%; filter:blur(60px); opacity:.35; pointer-events:none;
+      animation:float 6s ease-in-out infinite;
+    }
+    .orb-1 { width:300px; height:300px; background:var(--np-pink);   top:-100px; right:-80px;  animation-delay:0s; }
+    .orb-2 { width:200px; height:200px; background:var(--np-purple); bottom:50px; left:-60px;  animation-delay:2s; }
+    .orb-3 { width:150px; height:150px; background:var(--np-blue);   bottom:100px; right:10%;  animation-delay:4s; }
+
+    /* ── Streaming Profile Selector (Netflix Style) ── */
+    .profile-stream-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      text-align: center;
+      animation: fadeInUp 0.4s ease-out both;
+    }
+    .profile-stream-title {
+      font-size: 2rem;
+      font-weight: 950;
+      color: var(--np-text);
+      margin-bottom: 2rem;
+      letter-spacing: -0.02em;
+    }
+    .profiles-stream-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      width: 100%;
+    }
+    .profile-stream-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      width: 120px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    .profile-stream-item:hover {
+      transform: translateY(-6px);
+    }
+    .avatar-circle-stream {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: var(--np-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      border: 3px solid var(--np-border);
+      box-shadow: var(--np-shadow);
+      transition: all 0.25s ease;
+      margin-bottom: 0.75rem;
+      position: relative;
+    }
+    .profile-stream-item:hover .avatar-circle-stream {
+      border-color: var(--avatar-color, var(--np-blue));
+      box-shadow: 0 0 20px var(--avatar-color, var(--np-blue));
+      transform: scale(1.05);
+    }
+    .profile-stream-label {
+      font-size: 0.9rem;
+      color: var(--np-text);
+      font-weight: 700;
+      transition: color 0.2s;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 100%;
+    }
+    .profile-stream-role {
+      font-size: 0.65rem;
+      color: var(--np-text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    /* Emphasized student profile circle */
+    .profile-stream-student .avatar-circle-stream {
+      width: 108px;
+      height: 108px;
+      border-width: 4px;
+      border-color: var(--np-blue);
+      box-shadow: 0 8px 25px rgba(59,130,246,0.2);
+    }
+    .profile-stream-student .profile-stream-label {
+      font-size: 1rem;
+      color: var(--np-blue);
+    }
+    /* PIN Prompt Overlay */
+    .pin-overlay-pop {
+      background: var(--np-card);
+      border: 1.5px solid var(--np-border);
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      position: absolute;
+      top: 130px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 190px;
+      z-index: 50;
+      display: none;
+      animation: fadeInUp 0.2s ease-out;
+    }
+    .pin-overlay-pop::before {
+      content: '';
+      position: absolute;
+      top: -7px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 12px;
+      height: 12px;
+      background: var(--np-card);
+      border-left: 1.5px solid var(--np-border);
+      border-top: 1.5px solid var(--np-border);
+    }
+
+    /* PWA custom PIN modal */
+    #np-pin-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      backdrop-filter: blur(4px);
+    }
+    #np-pin-modal-box {
+      background: var(--np-card);
+      border: 1px solid var(--np-border);
+      border-radius: 24px;
+      padding: 1.75rem 1.5rem;
+      max-width: 320px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      animation: fadeInUp 0.25s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Decorative background orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- Main layout -->
+<div class="min-vh-100 d-flex flex-column">
+
+  <!-- Top bar -->
+  <header class="py-3 px-4 d-flex align-items-center justify-content-between" style="background:var(--np-card); border-bottom:1px solid var(--np-border); position:sticky; top:0; z-index:100; backdrop-filter:blur(12px);">
+    <img src="encabezado.png" alt="NeuroPro" class="np-header-img" />
+    <button class="btn-theme border-0" onclick="NP_toggleTheme()" title="Cambiar tema" id="btn-theme-top">
+      <i id="theme-icon" class="fas fa-moon"></i>
+    </button>
+  </header>
+
+  <!-- Main content -->
+  <main class="flex-grow-1 d-flex align-items-center justify-content-center py-5 px-3" style="position:relative; z-index:1;">
+    
+    <!-- STEP 1: Centralized minimal login card -->
+    <div id="login-step-1" class="w-100 fade-in-up" style="max-width:440px;">
+      <div class="np-card p-5">
+        <div class="text-center mb-4">
+          <div style="font-size:2.8rem; margin-bottom:.5rem;">🔐</div>
+          <h2 class="fw-black mb-1" style="font-size:1.6rem; color:var(--np-text);">Iniciar Sesión</h2>
+          <p class="small text-muted">Ingresa el correo electrónico de tu cuenta familiar o escolar</p>
+        </div>
+        <form onsubmit="continueToProfiles(event)">
+          <div class="mb-3">
+            <label class="np-label">Correo Electrónico</label>
+            <input type="email" id="login-email" class="np-input py-2.5" placeholder="ejemplo@correo.com" required value="familia@neuropro.com" />
+          </div>
+          <div class="mb-4">
+            <label class="np-label">Contraseña de la Cuenta</label>
+            <input type="password" id="login-password" class="np-input py-2.5" placeholder="••••••••" required value="neuropro2026" />
+          </div>
+          <button type="submit" class="btn btn-np-save w-100 py-2.5 fw-bold" style="font-size:.95rem;">
+            Continuar <i class="fas fa-arrow-right ms-1"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- STEP 2: Streaming-style profile selector -->
+    <div id="login-step-2" class="w-100" style="display:none; max-width:900px;">
+      <div class="profile-stream-wrap">
+        <h2 class="profile-stream-title">¿Quién está listo para sus misiones?</h2>
+        
+        <div class="profiles-stream-row" id="profiles-list">
+          <!-- Circular profiles populated dynamically -->
+        </div>
+
+        <button class="btn btn-link btn-sm text-muted border-0 d-inline-flex align-items-center gap-1" onclick="showStep1()" style="font-size:.85rem; text-decoration:none; margin-top: 2rem;">
+          <i class="fas fa-arrow-left"></i> Cambiar de Correo
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-4 px-4" style="border-top:1px solid var(--np-border); color:var(--np-text-muted); font-size:.72rem;">
+    <div>© 2026 NeuroPro — Portal de Autonomía Funcional</div>
+    <div class="mt-1">Planificador de Autonomía Funcional escalable para TEA, TDAH y condiciones afines.</div>
+  </footer>
+
+  <!-- Custom styled PIN modal -->
+  <div id="np-pin-modal-backdrop" onclick="closePinModal()">
+    <div id="np-pin-modal-box" onclick="event.stopPropagation()">
+      <div id="np-pin-avatar" style="font-size:2.8rem; margin-bottom:.5rem;">👩</div>
+      <h5 id="np-pin-title" class="fw-bold" style="font-size:1.05rem; font-weight:900; margin-bottom:0.25rem;">Ingresar PIN</h5>
+      <p id="np-pin-subtitle" style="font-size:.78rem; color:var(--np-text-muted); margin-bottom:1.25rem;">Ingresa el PIN de acceso para el perfil.</p>
+      
+      <input type="password" id="np-pin-input" class="np-input text-center fs-5 fw-bold mb-3" placeholder="••••" maxlength="6" style="letter-spacing: 0.3em; max-width: 160px; margin: 0 auto; display: block;" />
+      
+      <div class="d-flex gap-2 justify-content-center">
+        <button onclick="closePinModal()" class="btn btn-sm fw-bold px-3 py-2 border-0" style="border-radius:12px; background:var(--np-bg); color:var(--np-text-muted); font-size: 0.78rem;">Cancelar</button>
+        <button onclick="submitPin()" class="btn btn-sm fw-bold px-4 py-2 text-white border-0" style="border-radius:12px; background:linear-gradient(135deg,var(--np-pink),var(--np-purple)); font-size: 0.78rem;">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /min-vh-100 -->
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Shared NeuroPro JS -->
+<script src="shared.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    NP_initSystem();
+    NP_applyTheme();
+
+    // Si ya hay sesión activa, redirigir directamente
+    const session = NP_getSession();
+    if (session) {
+      window.location.href = session.role === 'alumno' ? 'alumno.html' : 'dashboard.html';
+    }
+
+    // Support enter key on PIN modal
+    const pinInput = document.getElementById('np-pin-input');
+    if (pinInput) {
+      pinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitPin();
+      });
+    }
+  });
+
+  function continueToProfiles(event) {
+    if (event) event.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+    
+    if (!email) {
+      NP_showToast('Por favor, ingresa tu correo electrónico.', 'error');
+      return;
+    }
+    if (!password) {
+      NP_showToast('Por favor, ingresa la contraseña de la cuenta.', 'error');
+      return;
+    }
+    
+    // Contraseña general de la cuenta
+    if (password !== 'neuropro2026' && password !== '123456') {
+      NP_showToast('Contraseña de cuenta incorrecta.', 'error');
+      return;
+    }
+
+    // Show profiles selection
+    document.getElementById('login-step-1').style.display = 'none';
+    document.getElementById('login-step-2').style.display = 'block';
+    
+    renderProfileSelection();
+  }
+
+  function showStep1() {
+    document.getElementById('login-step-1').style.display = 'block';
+    document.getElementById('login-step-2').style.display = 'none';
+  }
+
+  function renderProfileSelection() {
+    const container = document.getElementById('profiles-list');
+    container.innerHTML = '';
+
+    const profile = NP_getProfile();
+    const network = NP_getNetwork();
+
+    // 1. Student profile (emphasized, large, cartoonish circular avatar)
+    const stItem = document.createElement('div');
+    stItem.className = 'profile-stream-item profile-stream-student';
+    stItem.style.setProperty('--avatar-color', 'var(--np-blue)');
+    stItem.innerHTML = `
+      <div class="avatar-circle-stream" onclick="loginAsStudent()" title="Tomás">
+        🎨
+      </div>
+      <div class="profile-stream-label">${profile.name.split(' ')[0]}</div>
+      <div class="profile-stream-role">Alumno</div>
+    `;
+    container.appendChild(stItem);
+
+    // 2. Caregiver profiles
+    const roleIcons = {
+      'Madre': '👩',
+      'Padre': '👨',
+      'Terapeuta': '🩺',
+      'Cuidador': '👤'
+    };
+
+    network.forEach((p, idx) => {
+      if (!p.active) return;
+      const avatarIcon = roleIcons[p.role] || '👤';
+      const colors = ['#f43f5e', '#a855f7', '#10b981'];
+      const color = colors[idx % colors.length];
+
+      const pItem = document.createElement('div');
+      pItem.className = 'profile-stream-item';
+      pItem.style.setProperty('--avatar-color', color);
+      pItem.innerHTML = `
+        <div class="avatar-circle-stream" onclick="selectCaregiverProfile(${p.id})" style="border-color: var(--np-border);" id="avatar-circle-${p.id}">
+          ${avatarIcon}
+        </div>
+        <div class="profile-stream-label">${p.name.split(' ')[0]}</div>
+        <div class="profile-stream-role">${p.role}</div>
+      `;
+      container.appendChild(pItem);
+    });
+  }
+
+  function loginAsStudent() {
+    const profile = NP_getProfile();
+    const session = {
+      role: 'alumno',
+      name: profile.name,
+      loginTime: new Date().toISOString(),
+    };
+    NP_setSession(session);
+    NP_showToast(`¡Hola, ${profile.name.split(' ')[0]}!`, 'success');
+    setTimeout(() => {
+      window.location.href = 'alumno.html';
+    }, 700);
+  }
+
+  let activePinProfileId = null;
+
+  function selectCaregiverProfile(id) {
+    const network = NP_getNetwork();
+    const p = network.find(x => x.id === id);
+    if (!p) return;
+
+    activePinProfileId = id;
+    
+    const roleIcons = {
+      'Madre': '👩',
+      'Padre': '👨',
+      'Terapeuta': '🩺',
+      'Cuidador': '👤'
+    };
+    document.getElementById('np-pin-avatar').textContent = roleIcons[p.role] || '👤';
+    document.getElementById('np-pin-subtitle').textContent = `Ingresa el PIN de acceso para ${p.name.split(' ')[0]}`;
+    
+    const pinInput = document.getElementById('np-pin-input');
+    pinInput.value = '';
+    
+    document.getElementById('np-pin-modal-backdrop').style.display = 'flex';
+    pinInput.focus();
+  }
+
+  function closePinModal() {
+    document.getElementById('np-pin-modal-backdrop').style.display = 'none';
+    activePinProfileId = null;
+  }
+
+  function submitPin() {
+    if (activePinProfileId === null) return;
+    const network = NP_getNetwork();
+    const p = network.find(x => x.id === activePinProfileId);
+    if (!p) return;
+
+    const pin = document.getElementById('np-pin-input').value.trim();
+    const correctPin = p.pin || '1234';
+    
+    if (pin === correctPin) {
+      closePinModal();
+      const session = {
+        role: 'cuidador',
+        name: p.name,
+        loginTime: new Date().toISOString(),
+      };
+      NP_setSession(session);
+      NP_showToast(`Bienvenido/a, ${p.name.split(' ')[0]}`, 'success');
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 700);
+    } else {
+      NP_showToast('Contraseña de perfil incorrecta.', 'error');
+      const pinInput = document.getElementById('np-pin-input');
+      pinInput.value = '';
+      pinInput.focus();
+    }
+  }
+</script>
+</body>
+</html>

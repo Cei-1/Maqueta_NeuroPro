@@ -1,0 +1,2621 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="manifest" href="manifest.json" />
+    <title>NeuroPro — Agenda de Tareas</title>
+    <meta
+      name="description"
+      content="Programa tareas recurrentes y únicas para el alumno. Similar a Teams: con días, hora y recurrencia."
+    />
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --np-pink: #f43f5e;
+        --np-pink-soft: #fff1f2;
+        --np-blue: #3b82f6;
+        --np-blue-soft: #eff6ff;
+        --np-purple: #a855f7;
+        --np-green: #10b981;
+        --np-orange: #f97316;
+        --np-bg: #f8fafc;
+        --np-card: #ffffff;
+        --np-sidebar: #ffffff;
+        --np-border: #e2e8f0;
+        --np-text: #0f172a;
+        --np-text-muted: #64748b;
+        --np-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+      }
+      [data-bs-theme="dark"] {
+        --np-bg: #090d16;
+        --np-card: #111827;
+        --np-sidebar: #0b111e;
+        --np-border: #1e293b;
+        --np-text: #f1f5f9;
+        --np-text-muted: #94a3b8;
+        --np-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--np-bg);
+        color: var(--np-text);
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+      [data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
+        background: #1f2937;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-in-up {
+        animation: fadeInUp 0.35s ease-out both;
+      }
+      .delay-1 {
+        animation-delay: 0.07s;
+      }
+      .delay-2 {
+        animation-delay: 0.14s;
+      }
+      .delay-3 {
+        animation-delay: 0.21s;
+      }
+      /* Sidebar */
+      .np-sidebar {
+        width: 72px;
+        min-height: 100vh;
+        background: var(--np-sidebar);
+        border-right: 1px solid var(--np-border);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.25rem 0.75rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 200;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+        user-select: none;
+      }
+      .np-sidebar * {
+        user-select: none;
+      }
+      .np-sidebar .nav-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        margin-bottom: 0.6rem;
+        transition: all 0.2s;
+        color: var(--np-text-muted);
+        background: transparent;
+        position: relative;
+      }
+      .np-sidebar .nav-btn:hover {
+        background: var(--np-pink-soft);
+        color: var(--np-pink);
+        transform: scale(1.08);
+      }
+      .np-sidebar .nav-btn.active {
+        background: var(--np-pink);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+      }
+      [data-bs-theme="dark"] .np-sidebar .nav-btn:hover {
+        background: rgba(244, 63, 94, 0.12);
+      }
+      .np-sidebar .sidebar-bottom {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .np-sidebar .btn-theme-sb {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid var(--np-border);
+        background: var(--np-card);
+        color: var(--np-text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+      .np-sidebar .btn-theme-sb:hover {
+        transform: scale(1.1);
+      }
+      .np-sidebar .avatar-pill {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        background: var(--np-pink-soft);
+        color: var(--np-pink);
+        font-weight: 800;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--np-border);
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.2s;
+        padding: 0;
+        overflow: hidden;
+      }
+      .np-sidebar .avatar-pill:hover {
+        transform: scale(1.08);
+        background: var(--np-pink-soft);
+        color: var(--np-pink);
+      }
+      .np-sidebar .avatar-pill.active {
+        background: var(--np-pink);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        border-color: var(--np-pink);
+      }
+      .sidebar-tooltip {
+        position: absolute;
+        left: 56px;
+        background: #1e293b;
+        color: #fff;
+        border-radius: 8px;
+        padding: 0.25rem 0.65rem;
+        font-size: 0.72rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 300;
+      }
+
+      /* Nivel de apoyos - Botones de Calificación */
+      .support-btn {
+        border-radius: 12px;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 2px solid var(--np-border);
+        background: var(--np-bg);
+        color: var(--np-text);
+        transition: all 0.18s;
+        cursor: pointer;
+        white-space: nowrap;
+        margin-bottom: 0.25rem;
+      }
+      .support-btn:hover {
+        transform: scale(1.04);
+      }
+      .support-btn.selected-1 {
+        background: rgba(16, 185, 129, 0.12);
+        border-color: #10b981;
+        color: #10b981;
+      }
+      .support-btn.selected-2 {
+        background: rgba(59, 130, 246, 0.12);
+        border-color: #3b82f6;
+        color: #3b82f6;
+      }
+      .support-btn.selected-3 {
+        background: rgba(249, 115, 22, 0.12);
+        border-color: #f97316;
+        color: #f97316;
+      }
+      .support-btn.selected-4 {
+        background: rgba(244, 63, 94, 0.12);
+        border-color: var(--np-pink);
+        color: var(--np-pink);
+      }
+      .nav-btn:hover .sidebar-tooltip {
+        opacity: 1;
+      }
+      .np-main {
+        margin-left: 72px;
+        min-height: 100vh;
+      }
+      .np-header {
+        background: var(--np-card);
+        border-bottom: 1px solid var(--np-border);
+        padding: 0.9rem 1.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+      }
+      .np-header-img {
+        max-height: 52px;
+        object-fit: contain;
+      }
+      .np-card {
+        background: var(--np-card);
+        border: 1px solid var(--np-border);
+        border-radius: 20px;
+        box-shadow: var(--np-shadow);
+      }
+      #toast-container {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        pointer-events: none;
+      }
+      #toast-container .toast {
+        pointer-events: auto;
+      }
+      .np-pill {
+        border-radius: 999px;
+        padding: 0.3rem 0.85rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .np-input {
+        background: var(--np-bg);
+        border: 1.5px solid var(--np-border);
+        border-radius: 12px;
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        color: var(--np-text);
+        font-family: "Inter", sans-serif;
+        width: 100%;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .np-input:focus {
+        outline: none;
+        border-color: var(--np-purple);
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+      }
+      .np-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--np-text-muted);
+        margin-bottom: 0.4rem;
+        display: block;
+      }
+      .btn-np-save {
+        background: linear-gradient(135deg, var(--np-purple), var(--np-blue));
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        padding: 0.7rem 1.75rem;
+        font-weight: 800;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(168, 85, 247, 0.3);
+      }
+      .btn-np-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
+        color: #fff;
+      }
+
+      /* Day selector */
+      .day-pills {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+      .day-pill {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2px solid var(--np-border);
+        background: var(--np-bg);
+        color: var(--np-text-muted);
+        font-size: 0.72rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.18s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .day-pill:hover {
+        border-color: var(--np-purple);
+        color: var(--np-purple);
+      }
+      .day-pill.active {
+        background: var(--np-purple);
+        border-color: var(--np-purple);
+        color: #fff;
+        box-shadow: 0 3px 10px rgba(168, 85, 247, 0.35);
+      }
+
+      /* Task cards */
+      .task-card {
+        background: var(--np-card);
+        border: 2px solid var(--np-border);
+        border-radius: 18px;
+        padding: 1.1rem 1.25rem;
+        transition: all 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .task-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.09);
+      }
+      .task-card .tc-bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 2px 0 0 2px;
+      }
+      .task-card .tc-time {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: var(--np-text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-bottom: 0.4rem;
+      }
+      .task-card .tc-title {
+        font-size: 0.9rem;
+        font-weight: 800;
+        margin-bottom: 0.2rem;
+      }
+      .task-card .tc-rec {
+        font-size: 0.7rem;
+        color: var(--np-text-muted);
+      }
+      .task-card .tc-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+      }
+
+      /* Today timeline */
+      .timeline-item {
+        display: flex;
+        gap: 1rem;
+        position: relative;
+        padding-bottom: 1rem;
+      }
+      .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: 23px;
+        top: 28px;
+        bottom: 0;
+        width: 2px;
+        background: var(--np-border);
+      }
+      .timeline-item:last-child::before {
+        display: none;
+      }
+      .tl-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 6px;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px var(--np-border);
+      }
+      .tl-time {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: var(--np-text-muted);
+        min-width: 52px;
+        padding-top: 4px;
+      }
+      .tl-card {
+        background: var(--np-bg);
+        border: 1.5px solid var(--np-border);
+        border-radius: 14px;
+        padding: 0.75rem 1rem;
+        flex-grow: 1;
+      }
+      .tl-card.tl-done {
+        opacity: 0.6;
+      }
+      .tl-card.cursor-pointer {
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          transform 0.15s;
+      }
+      .tl-card.cursor-pointer:hover {
+        border-color: var(--np-purple);
+        transform: translateX(2px);
+      }
+      .tl-card .tl-title {
+        font-size: 0.85rem;
+        font-weight: 800;
+      }
+      .tl-card .tl-sub {
+        font-size: 0.72rem;
+        color: var(--np-text-muted);
+      }
+      .tl-executions {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+      }
+      .tl-exec-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        border: 1px solid var(--np-border);
+      }
+      .cursor-pointer {
+        cursor: pointer;
+      }
+
+      /* Week grid table dark mode */
+      #week-grid-view table {
+        border-color: var(--np-border) !important;
+      }
+      #week-grid-view table td,
+      #week-grid-view table th {
+        border-color: var(--np-border) !important;
+      }
+      [data-bs-theme="dark"] #week-grid-view table {
+        background: var(--np-card);
+      }
+      [data-bs-theme="dark"] #week-grid-view tbody tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      /* Color swatch picker */
+      .color-swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        cursor: pointer;
+        transition: transform 0.15s;
+        flex-shrink: 0;
+      }
+      .color-swatch.selected {
+        border-color: #fff;
+        box-shadow: 0 0 0 3px currentColor;
+      }
+      .color-swatch:hover {
+        transform: scale(1.15);
+      }
+
+      /* ── Mobile bottom nav ──────────────────────────── */
+      @media (max-width: 768px) {
+        .np-sidebar {
+          width: 100%;
+          min-height: auto;
+          height: 62px;
+          flex-direction: row;
+          border-right: none;
+          border-top: 1px solid var(--np-border);
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          top: auto;
+          padding: 0.5rem 1rem;
+          z-index: 300;
+          background: var(--np-sidebar);
+          box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+          justify-content: space-around;
+        }
+        .np-sidebar .nav-btn {
+          margin-bottom: 0;
+          margin-right: 0;
+          width: 48px;
+          height: 48px;
+        }
+        .np-sidebar .sidebar-bottom {
+          flex-direction: row;
+          margin-top: 0;
+          margin-left: 0;
+          gap: 0.4rem;
+        }
+        .np-main {
+          margin-left: 0;
+          padding-bottom: 72px !important;
+        }
+        .sidebar-tooltip {
+          display: none;
+        }
+        /* hide view switcher dropdown on mobile — replaced by week strip */
+        #agenda-view-mode,
+        #agenda-view-mode + button,
+        #agenda-view-mode ~ button {
+          display: none !important;
+        }
+        /* Mobile week strip */
+        #mobile-week-strip {
+          display: flex !important;
+        }
+        /* hide day nav arrows on mobile (strip handles it) */
+        .agenda-day-nav {
+          display: none;
+        }
+      }
+      @media (min-width: 769px) {
+        #mobile-week-strip {
+          display: none !important;
+        }
+        .agenda-day-nav {
+          display: inline-flex;
+        }
+      }
+
+      /* Mobile week strip */
+      #mobile-week-strip {
+        overflow-x: auto;
+        gap: 0.4rem;
+        padding: 0.5rem 0 0.75rem;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      #mobile-week-strip::-webkit-scrollbar {
+        display: none;
+      }
+      .mws-day {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        height: 62px;
+        border-radius: 16px;
+        border: 2px solid var(--np-border);
+        background: var(--np-card);
+        cursor: pointer;
+        transition: all 0.18s;
+        flex-shrink: 0;
+        gap: 2px;
+      }
+      .mws-day.today {
+        border-color: var(--np-purple);
+      }
+      .mws-day.selected {
+        background: var(--np-purple);
+        border-color: var(--np-purple);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4);
+      }
+      .mws-day .mws-name {
+        font-size: 0.58rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        opacity: 0.7;
+      }
+      .mws-day .mws-num {
+        font-size: 1.05rem;
+        font-weight: 900;
+        line-height: 1;
+      }
+      .mws-day .mws-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.5;
+      }
+      .mws-day.selected .mws-name,
+      .mws-day.selected .mws-dot {
+        opacity: 0.85;
+      }
+
+      /* Custom confirm dialog */
+      #np-confirm-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 9998;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        backdrop-filter: blur(4px);
+      }
+      #np-confirm-box {
+        background: var(--np-card);
+        border: 1px solid var(--np-border);
+        border-radius: 24px;
+        padding: 1.75rem 1.5rem;
+        max-width: 380px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: fadeInUp 0.2s ease-out;
+      }
+      #np-confirm-icon {
+        font-size: 2.2rem;
+        margin-bottom: 0.75rem;
+        display: block;
+        text-align: center;
+      }
+      #np-confirm-title {
+        font-size: 1.05rem;
+        font-weight: 900;
+        text-align: center;
+        margin-bottom: 0.5rem;
+      }
+      #np-confirm-msg {
+        font-size: 0.84rem;
+        color: var(--np-text-muted);
+        text-align: center;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+      }
+      .btn-day-nav {
+        width: 38px; height: 38px; border-radius: 50%;
+        border: 1.5px solid var(--np-border); background: var(--np-bg);
+        color: var(--np-text-muted); display: inline-flex; align-items: center; justify-content: center;
+        transition: all .2s; cursor: pointer; font-size: .85rem; padding: 0; outline: none;
+      }
+      .btn-day-nav:hover {
+        background: var(--np-purple); color: #fff; border-color: var(--np-purple);
+        transform: scale(1.08); box-shadow: 0 4px 10px rgba(168,85,247,.3);
+      }
+      .btn-day-nav:active {
+        transform: scale(.95);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="toast-container"></div>
+    <div class="d-flex flex-column flex-md-row">
+      <!-- Sidebar -->
+      <nav class="np-sidebar">
+        <button
+          class="nav-btn"
+          onclick="location.href = 'dashboard.html'"
+          title="Panel"
+        >
+          <i class="fas fa-house"></i
+          ><span class="sidebar-tooltip">Panel Principal</span>
+        </button>
+        <button
+          class="nav-btn"
+          onclick="location.href = 'actividades.html'"
+          title="Actividades"
+        >
+          <i class="fas fa-list-check"></i
+          ><span class="sidebar-tooltip">Actividades</span>
+        </button>
+        <button class="nav-btn active" title="Agenda">
+          <i class="fas fa-calendar-check"></i
+          ><span class="sidebar-tooltip">Agenda de Tareas</span>
+        </button>
+        <button
+          class="nav-btn"
+          onclick="location.href = 'indicadores.html'"
+          title="Indicadores"
+        >
+          <i class="fas fa-chart-line"></i
+          ><span class="sidebar-tooltip">Indicadores</span>
+        </button>
+        <button
+          class="nav-btn"
+          onclick="location.href = 'alumno.html'"
+          title="Vista Alumno"
+        >
+          <i class="fas fa-child-reaching"></i
+          ><span class="sidebar-tooltip">Vista del Alumno</span>
+        </button>
+        <div class="sidebar-bottom">
+          <button class="btn-theme-sb border-0" onclick="NP_toggleTheme()">
+            <i
+              id="theme-icon"
+              class="fas fa-moon"
+              style="font-size: 0.85rem"
+            ></i>
+          </button>
+          <button
+            class="avatar-pill"
+            id="sidebar-avatar"
+            onclick="location.href = 'perfil.html'"
+            title="Configurar Perfil"
+          >
+            CC
+          </button>
+        </div>
+      </nav>
+
+      <!-- Main -->
+      <div class="np-main flex-grow-1">
+        <header class="np-header">
+          <img src="encabezado.png" alt="NeuroPro" class="np-header-img" />
+          <div class="d-flex align-items-center gap-3">
+            <span
+              id="session-badge"
+              class="np-pill"
+              style="
+                background: rgba(168, 85, 247, 0.1);
+                color: var(--np-purple);
+              "
+            >
+              <span
+                style="
+                  width: 7px;
+                  height: 7px;
+                  border-radius: 50%;
+                  background: var(--np-purple);
+                "
+              ></span>
+              Cargando…
+            </span>
+            <button
+              id="btn-logout"
+              onclick="NP_logout()"
+              class="btn btn-sm fw-bold"
+              style="
+                border-radius: 10px;
+                background: rgba(168, 85, 247, 0.08);
+                color: var(--np-purple);
+                border: 1px solid rgba(168, 85, 247, 0.2);
+                font-size: 0.75rem;
+                display: none;
+              "
+            >
+              <i class="fas fa-right-from-bracket me-1"></i> Salir
+            </button>
+          </div>
+        </header>
+
+        <div class="p-4 p-md-5" style="max-width: 1200px; margin: 0 auto">
+          <!-- Title -->
+          <div
+            class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4 fade-in-up"
+          >
+            <div>
+              <div
+                class="d-flex align-items-center gap-2 mb-1"
+                style="
+                  color: var(--np-purple);
+                  font-size: 0.7rem;
+                  font-weight: 800;
+                  text-transform: uppercase;
+                  letter-spacing: 0.1em;
+                "
+              >
+                <i class="fas fa-calendar-check"></i> Programación de
+                Actividades
+              </div>
+              <h2 class="fw-black mb-1" style="font-size: 1.6rem">
+                Agenda de Tareas
+              </h2>
+              <p
+                style="
+                  color: var(--np-text-muted);
+                  font-size: 0.85rem;
+                  margin: 0;
+                "
+              >
+                Crea tareas recurrentes con días, hora y actividad — similar a
+                una reunión en Teams.
+              </p>
+            </div>
+            <button
+              class="btn-np-save d-flex align-items-center gap-2"
+              onclick="openTaskModal()"
+              style="white-space: nowrap"
+            >
+              <i class="fas fa-plus-circle"></i> Nueva Tarea
+            </button>
+          </div>
+
+          <!-- Mobile week strip (only visible on mobile) -->
+          <div id="mobile-week-strip" class="d-flex mb-3 fade-in-up"></div>
+
+          <div class="row g-4">
+            <!-- Calendar: full width always -->
+            <div class="col-12 fade-in-up delay-1" id="calendar-section-col">
+              <div class="np-card p-4 mb-4">
+                <div
+                  class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2"
+                >
+                  <div>
+                    <div
+                      style="
+                        font-size: 0.7rem;
+                        font-weight: 800;
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        color: var(--np-purple);
+                      "
+                    >
+                      <i class="fas fa-sun me-1"></i> Actividades Programadas
+                    </div>
+                    <div
+                      style="font-size: 1rem; font-weight: 800"
+                      id="today-label"
+                    >
+                      —
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center gap-1">
+                    <select
+                      id="agenda-view-mode"
+                      class="np-input py-1 px-2 border border-1"
+                      style="
+                        width: auto;
+                        font-size: 0.75rem;
+                        border-radius: 10px;
+                      "
+                      onchange="switchAgendaView(this.value)"
+                    >
+                      <option value="list">Día</option>
+                      <option value="week-grid">Semana</option>
+                    </select>
+                    <button
+                      onclick="shiftDay(-1)"
+                      class="btn-day-nav agenda-day-nav"
+                      title="Día Anterior"
+                    >
+                      <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button
+                      onclick="shiftDay(1)"
+                      class="btn-day-nav agenda-day-nav"
+                      title="Día Siguiente"
+                    >
+                      <i class="fas fa-chevron-right"></i>
+                    </button>
+                  </div>
+                </div>
+                <div id="today-timeline" style="display: block"></div>
+                <div
+                  id="week-grid-view"
+                  style="display: none; overflow-x: auto"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Hidden elements needed by renderTaskList() but panel is removed -->
+            <div style="display: none">
+              <input type="text" id="task-search" />
+              <select id="task-filter-rec"></select>
+              <span id="task-count-badge"></span>
+              <div id="task-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Create/Edit Task -->
+    <div class="modal fade" id="taskModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div
+          class="modal-content"
+          style="
+            background: var(--np-card);
+            border: 1px solid var(--np-border);
+            border-radius: 24px;
+          "
+        >
+          <div class="modal-header border-0 pb-0 pt-4 px-4">
+            <h5 class="modal-title fw-black fs-5" id="taskModalTitle">
+              Nueva Tarea
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body px-4 pb-2">
+            <input type="hidden" id="tm-id" />
+            <div class="row g-3">
+              <!-- Skill selector -->
+              <div class="col-12">
+                <label class="np-label">Actividad</label>
+                <select class="np-input" id="tm-skill"></select>
+              </div>
+              <!-- Label override -->
+              <div class="col-12">
+                <label class="np-label"
+                  >Etiqueta de la tarea (nombre visible)</label
+                >
+                <input
+                  type="text"
+                  class="np-input"
+                  id="tm-label"
+                  placeholder="Ej: Lavarse las manos — Mañana"
+                />
+              </div>
+
+              <!-- Time with En este momento button -->
+              <div class="col-md-6">
+                <label class="np-label">Hora</label>
+                <div class="input-group">
+                  <input
+                    type="time"
+                    class="np-input"
+                    id="tm-time"
+                    value="07:00"
+                    style="
+                      border-top-right-radius: 0;
+                      border-bottom-right-radius: 0;
+                    "
+                  />
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    id="btn-time-now"
+                    onclick="setTimeToNow()"
+                    style="
+                      border-top-left-radius: 0;
+                      border-bottom-left-radius: 0;
+                      border-color: var(--np-border);
+                      font-size: 0.8rem;
+                      font-weight: 600;
+                      background: var(--np-bg);
+                      color: var(--np-text-muted);
+                    "
+                  >
+                    <i class="fas fa-clock"></i> En este momento
+                  </button>
+                </div>
+              </div>
+
+              <!-- Repetitiva checkbox -->
+              <div class="col-12 my-3">
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="tm-repetitiva"
+                    onchange="toggleRepetitiveSection()"
+                  />
+                  <label
+                    class="form-check-label fw-bold"
+                    for="tm-repetitiva"
+                    style="font-size: 0.85rem"
+                    >Tarea repetitiva</label
+                  >
+                </div>
+              </div>
+
+              <!-- Non-repetitive date picker -->
+              <div class="col-md-6" id="non-repetitive-options">
+                <label class="np-label">Fecha de realización</label>
+                <input type="date" class="np-input" id="tm-single-date" />
+              </div>
+
+              <!-- Repetitive Options Wrapper -->
+              <div class="col-12" id="repetitive-options" style="display: none">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="np-label">Tipo de repetición</label>
+                    <select
+                      class="np-input"
+                      id="tm-rep-type"
+                      onchange="toggleRepTypeSection()"
+                    >
+                      <option value="always">Para siempre</option>
+                      <option value="range">Rango de fechas</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6" id="start-date-wrap">
+                    <label class="np-label">Fecha de inicio</label>
+                    <input type="date" class="np-input" id="tm-start" />
+                  </div>
+                  <div
+                    class="col-md-6"
+                    id="end-date-wrap"
+                    style="display: none"
+                  >
+                    <label class="np-label">Fecha de fin</label>
+                    <input type="date" class="np-input" id="tm-end" />
+                  </div>
+                  <!-- Day selector (weekly days) -->
+                  <div class="col-12" id="day-selector-wrap">
+                    <label class="np-label">Días de la semana</label>
+                    <div class="day-pills">
+                      <button
+                        type="button"
+                        class="day-pill"
+                        data-day="1"
+                        onclick="toggleDay(1)"
+                      >
+                        Lun
+                      </button>
+                      <button
+                        type="button"
+                        class="day-pill"
+                        data-day="2"
+                        onclick="toggleDay(2)"
+                      >
+                        Mar
+                      </button>
+                      <button
+                        type="button"
+                        class="day-pill"
+                        data-day="3"
+                        onclick="toggleDay(3)"
+                      >
+                        Mié
+                      </button>
+                      <button
+                        type="button"
+                        class="day-pill"
+                        data-day="4"
+                        onclick="toggleDay(4)"
+                      >
+                        Jue
+                      </button>
+                      <button
+                        type="button"
+                        class="day-pill"
+                        data-day="5"
+                        onclick="toggleDay(5)"
+                      >
+                        Vie
+                      </button>
+                      <button
+                        type="button"
+                        class="day-pill"
+                        data-day="6"
+                        onclick="toggleDay(6)"
+                      >
+                        Sáb
+                      </button>
+                      <button
+                        type="button"
+                        class="day-pill"
+                        data-day="0"
+                        onclick="toggleDay(0)"
+                      >
+                        Dom
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Color -->
+              <div class="col-12">
+                <label class="np-label">Color de etiqueta</label>
+                <div class="d-flex gap-2 flex-wrap" id="color-swatches"></div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="modal-footer border-0 px-4 pb-4 pt-0 flex-column align-items-stretch gap-2"
+          >
+            <!-- Danger zone: cancel/delete for existing tasks -->
+            <div
+              id="task-edit-danger-zone"
+              style="
+                display: none;
+                border-top: 1px solid var(--np-border);
+                padding-top: 0.75rem;
+                margin-top: 0.25rem;
+              "
+            >
+              <div class="d-flex gap-2 flex-wrap">
+                <button
+                  id="btn-cancel-for-date"
+                  onclick="cancelForCurrentDate()"
+                  class="btn fw-bold btn-sm"
+                  style="
+                    border-radius: 10px;
+                    background: rgba(249, 115, 22, 0.1);
+                    color: var(--np-orange);
+                    border: 1px solid rgba(249, 115, 22, 0.25);
+                    font-size: 0.78rem;
+                  "
+                >
+                  <i class="fas fa-ban me-1"></i
+                  ><span id="cancel-for-date-label"
+                    >Cancelar para esta fecha</span
+                  >
+                </button>
+                <button
+                  onclick="deleteSeriesConfirm()"
+                  class="btn fw-bold btn-sm"
+                  style="
+                    border-radius: 10px;
+                    background: rgba(244, 63, 94, 0.1);
+                    color: var(--np-pink);
+                    border: 1px solid rgba(244, 63, 94, 0.25);
+                    font-size: 0.78rem;
+                  "
+                >
+                  <i class="fas fa-trash me-1"></i> Eliminar Serie Completa
+                </button>
+              </div>
+            </div>
+            <div
+              class="d-flex justify-content-between align-items-center w-100"
+            >
+              <button
+                class="btn fw-bold"
+                data-bs-dismiss="modal"
+                style="border-radius: 12px; font-size: 0.82rem"
+              >
+                Cerrar
+              </button>
+              <button class="btn-np-save" onclick="saveTask()">
+                <i class="fas fa-save me-1"></i> Guardar Tarea
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Execution detail -->
+    <div class="modal fade" id="execModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div
+          class="modal-content"
+          style="
+            background: var(--np-card);
+            border: 1px solid var(--np-border);
+            border-radius: 24px;
+          "
+        >
+          <div class="modal-header border-0 pb-0 pt-4 px-4">
+            <h5 class="modal-title fw-black fs-5" id="execModalTitle">
+              Detalle de Ejecución
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body px-4 pb-4" id="exec-modal-body"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Custom styled confirm dialog -->
+    <div id="np-confirm-backdrop" style="display: none">
+      <div id="np-confirm-box">
+        <span id="np-confirm-icon">⚠️</span>
+        <div id="np-confirm-title">Confirmar acción</div>
+        <p id="np-confirm-msg"></p>
+        <div class="d-flex gap-2 justify-content-center">
+          <button
+            id="np-confirm-cancel"
+            class="btn fw-bold px-4"
+            style="
+              border-radius: 14px;
+              border: 1.5px solid var(--np-border);
+              font-size: 0.85rem;
+            "
+          >
+            Cancelar
+          </button>
+          <button
+            id="np-confirm-ok"
+            class="btn fw-bold px-4"
+            style="
+              border-radius: 14px;
+              background: var(--np-pink);
+              color: #fff;
+              font-size: 0.85rem;
+              box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3);
+            "
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="shared.js"></script>
+    <script>
+      const TASK_COLORS = [
+        "#f43f5e",
+        "#3b82f6",
+        "#a855f7",
+        "#10b981",
+        "#f97316",
+        "#0ea5e9",
+        "#8b5cf6",
+        "#ec4899",
+        "#14b8a6",
+      ];
+      let selectedDays = [];
+      let selectedColor = "#a855f7";
+      let editingTaskId = null;
+      let editingDateContext = null; // date string for cancel-for-date action
+      let viewDate = new Date().toISOString().slice(0, 10);
+      let taskModal, execModal;
+
+      let gradingExecId = null;
+      let gradingSupports = {}; // stepId -> level
+
+      document.addEventListener("DOMContentLoaded", () => {
+        NP_initSystem();
+        if (!NP_checkSession()) return;
+        NP_applyTheme();
+        NP_updateHeader();
+
+        taskModal = new bootstrap.Modal(document.getElementById("taskModal"));
+        execModal = new bootstrap.Modal(document.getElementById("execModal"));
+
+        populateSkillSelect();
+        buildColorSwatches();
+        buildMobileWeekStrip();
+
+        // Set defaults
+        document.getElementById("tm-single-date").value = new Date()
+          .toISOString()
+          .slice(0, 10);
+        document.getElementById("tm-start").value = new Date()
+          .toISOString()
+          .slice(0, 10);
+        document.getElementById("tm-end").value = "";
+        document.getElementById("tm-repetitiva").checked = false;
+        toggleRepetitiveSection();
+
+        refreshAgendaViews();
+        renderTaskList();
+      });
+
+      // ── Skill select ──────────────────────────────
+      function populateSkillSelect() {
+        const sel = document.getElementById("tm-skill");
+        const routines = NP_getRoutines();
+        sel.innerHTML = "";
+        Object.keys(routines).forEach((key) => {
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = `${routines[key].icon} ${routines[key].name}`;
+          sel.appendChild(opt);
+        });
+        // Auto-fill label on change
+        sel.addEventListener("change", () => {
+          const r = NP_getRoutines()[sel.value];
+          if (r && !document.getElementById("tm-label").dataset.touched) {
+            document.getElementById("tm-label").value = r.name;
+          }
+        });
+        document
+          .getElementById("tm-label")
+          .addEventListener("input", function () {
+            this.dataset.touched = "1";
+          });
+      }
+
+      function buildColorSwatches() {
+        const wrap = document.getElementById("color-swatches");
+        wrap.innerHTML = "";
+        TASK_COLORS.forEach((c) => {
+          const div = document.createElement("div");
+          div.className = `color-swatch ${c === selectedColor ? "selected" : ""}`;
+          div.style.cssText = `background:${c};color:${c};`;
+          div.title = c;
+          div.onclick = () => {
+            selectedColor = c;
+            buildColorSwatches();
+          };
+          wrap.appendChild(div);
+        });
+      }
+
+      // ── Form handlers & Recurrence ────────────────────────────────
+      function toggleRepetitiveSection() {
+        const isRep = document.getElementById("tm-repetitiva").checked;
+        document.getElementById("repetitive-options").style.display = isRep
+          ? "block"
+          : "none";
+        document.getElementById("non-repetitive-options").style.display = isRep
+          ? "none"
+          : "block";
+        if (isRep) {
+          toggleRepTypeSection();
+        }
+      }
+
+      function toggleRepTypeSection() {
+        const type = document.getElementById("tm-rep-type").value;
+        document.getElementById("end-date-wrap").style.display =
+          type === "range" ? "block" : "none";
+      }
+
+      function setTimeToNow() {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, "0");
+        const mm = String(now.getMinutes()).padStart(2, "0");
+        document.getElementById("tm-time").value = `${hh}:${mm}`;
+      }
+
+      function toggleDay(d) {
+        if (selectedDays.includes(d))
+          selectedDays = selectedDays.filter((x) => x !== d);
+        else selectedDays.push(d);
+        document.querySelectorAll(".day-pill").forEach((el) => {
+          const day = parseInt(el.dataset.day);
+          el.classList.toggle("active", selectedDays.includes(day));
+        });
+      }
+
+      // ── Conflict Hours Validation ───────────────────────────
+      function checkTaskConflict(newTask) {
+        const tasks = NP_getTasks();
+        const newStart = newTask.startDate;
+        const newEnd = newTask.endDate || "9999-12-31";
+
+        // Helper to get days for comparison
+        const getTaskDays = (t) => {
+          if (t.recurrence === "daily") return [0, 1, 2, 3, 4, 5, 6];
+          if (t.recurrence === "weekly") return t.days || [];
+          return [];
+        };
+
+        for (let t of tasks) {
+          if (t.id === newTask.id) continue;
+          if (!t.active) continue;
+
+          if (t.time === newTask.time) {
+            const s1 = newStart;
+            const e1 = newEnd;
+            const s2 = t.startDate;
+            const e2 = t.endDate || "9999-12-31";
+
+            const datesOverlap = s1 <= e2 && s2 <= e1;
+            if (datesOverlap) {
+              if (newTask.recurrence === "none" && t.recurrence === "none") {
+                if (newTask.startDate === t.startDate) return t;
+              } else if (
+                newTask.recurrence === "none" &&
+                (t.recurrence === "weekly" || t.recurrence === "daily")
+              ) {
+                const d = new Date(newTask.startDate + "T12:00:00");
+                const dayOfWeek = d.getDay();
+                const tDays = getTaskDays(t);
+                if (tDays.includes(dayOfWeek)) return t;
+              } else if (
+                (newTask.recurrence === "weekly" ||
+                  newTask.recurrence === "daily") &&
+                t.recurrence === "none"
+              ) {
+                const d = new Date(t.startDate + "T12:00:00");
+                const dayOfWeek = d.getDay();
+                const newDays = getTaskDays(newTask);
+                if (newDays.includes(dayOfWeek)) return t;
+              } else {
+                // Both weekly/daily
+                const newDays = getTaskDays(newTask);
+                const tDays = getTaskDays(t);
+                const commonDays = newDays.filter((day) => tDays.includes(day));
+                if (commonDays.length > 0) return t;
+              }
+            }
+          }
+        }
+        return null;
+      }
+
+      // ── Modal open/save ───────────────────────────
+      function openTaskModal(taskId = null, dateContext = null) {
+        editingTaskId = taskId;
+        editingDateContext = dateContext || viewDate;
+        selectedDays = [];
+        selectedColor = "#a855f7";
+        document.getElementById("tm-id").value = "";
+        document.getElementById("tm-label").value = "";
+        delete document.getElementById("tm-label").dataset.touched;
+        document.getElementById("tm-time").value = "07:00";
+        document.getElementById("tm-single-date").value = new Date()
+          .toISOString()
+          .slice(0, 10);
+        document.getElementById("tm-start").value = new Date()
+          .toISOString()
+          .slice(0, 10);
+        document.getElementById("tm-end").value = "";
+        document.getElementById("tm-repetitiva").checked = false;
+        document.getElementById("tm-rep-type").value = "always";
+        toggleRepetitiveSection();
+        document
+          .querySelectorAll(".day-pill")
+          .forEach((el) => el.classList.remove("active"));
+
+        const dangerZone = document.getElementById("task-edit-danger-zone");
+
+        if (taskId) {
+          const t = NP_getTasks().find((x) => x.id === taskId);
+          if (!t) return;
+          document.getElementById("taskModalTitle").textContent =
+            "Editar Tarea";
+          document.getElementById("tm-id").value = t.id;
+          document.getElementById("tm-skill").value = t.skillKey;
+          document.getElementById("tm-label").value = t.label;
+          document.getElementById("tm-label").dataset.touched = "1";
+          document.getElementById("tm-time").value = t.time;
+          selectedColor = t.color || "#a855f7";
+
+          if (t.recurrence === "weekly" || t.recurrence === "daily") {
+            document.getElementById("tm-repetitiva").checked = true;
+            document.getElementById("tm-start").value = t.startDate;
+            if (t.endDate) {
+              document.getElementById("tm-rep-type").value = "range";
+              document.getElementById("tm-end").value = t.endDate;
+            } else {
+              document.getElementById("tm-rep-type").value = "always";
+              document.getElementById("tm-end").value = "";
+            }
+            if (t.recurrence === "daily") {
+              selectedDays = [0, 1, 2, 3, 4, 5, 6];
+            } else {
+              selectedDays = t.days ? [...t.days] : [];
+            }
+          } else {
+            document.getElementById("tm-repetitiva").checked = false;
+            document.getElementById("tm-single-date").value = t.startDate;
+          }
+
+          toggleRepetitiveSection();
+          document.querySelectorAll(".day-pill").forEach((el) => {
+            el.classList.toggle(
+              "active",
+              selectedDays.includes(parseInt(el.dataset.day)),
+            );
+          });
+
+          // Show danger zone with cancel/delete options
+          dangerZone.style.display = "block";
+          const isCancelledForDate =
+            t.cancelledDates && t.cancelledDates.includes(editingDateContext);
+          const cancelBtn = document.getElementById("btn-cancel-for-date");
+          const dateLabel = new Date(
+            editingDateContext + "T12:00:00",
+          ).toLocaleDateString("es-MX", { day: "2-digit", month: "short" });
+          if (isCancelledForDate) {
+            cancelBtn.innerHTML = `<i class="fas fa-rotate-left me-1"></i> Restaurar (${dateLabel})`;
+            cancelBtn.style.background = "rgba(16,185,129,.1)";
+            cancelBtn.style.color = "var(--np-green)";
+            cancelBtn.style.borderColor = "rgba(16,185,129,.25)";
+            cancelBtn.onclick = () => {
+              restoreTaskForDate(taskId, editingDateContext);
+              taskModal.hide();
+            };
+          } else {
+            cancelBtn.innerHTML = `<i class="fas fa-ban me-1"></i> Cancelar para ${dateLabel}`;
+            cancelBtn.style.background = "rgba(249,115,22,.1)";
+            cancelBtn.style.color = "var(--np-orange)";
+            cancelBtn.style.borderColor = "rgba(249,115,22,.25)";
+            cancelBtn.onclick = () => cancelForCurrentDate();
+          }
+          document.getElementById("cancel-for-date-label") &&
+            (document.getElementById("cancel-for-date-label").textContent =
+              dateLabel);
+        } else {
+          document.getElementById("taskModalTitle").textContent = "Nueva Tarea";
+          dangerZone.style.display = "none";
+          const r = NP_getRoutines()[document.getElementById("tm-skill").value];
+          if (r) document.getElementById("tm-label").value = r.name;
+        }
+
+        buildColorSwatches();
+        taskModal.show();
+      }
+
+      function cancelForCurrentDate() {
+        if (!editingTaskId || !editingDateContext) return;
+        cancelTaskForDate(editingTaskId, editingDateContext);
+        taskModal.hide();
+      }
+
+      function deleteSeriesConfirm() {
+        if (!editingTaskId) return;
+        const t = NP_getTasks().find((x) => x.id === editingTaskId);
+        if (!t) return;
+        const isSeries = t.recurrence !== "none";
+        const msg = isSeries
+          ? `Esto borrará todas las ocurrencias de "${t.label}" de forma permanente.`
+          : `Se eliminará "${t.label}" de forma permanente.`;
+        NP_confirm(
+          msg,
+          () => {
+            taskModal.hide();
+            deleteTask(editingTaskId);
+          },
+          {
+            title: isSeries ? "Eliminar serie completa" : "Eliminar actividad",
+            icon: "🗑️",
+            okLabel: "Sí, eliminar",
+            okColor: "var(--np-pink)",
+          },
+        );
+      }
+
+      function openTaskModalForTime(date, time) {
+        openTaskModal();
+        document.getElementById("tm-time").value = time;
+        document.getElementById("tm-single-date").value = date;
+        document.getElementById("tm-start").value = date;
+      }
+
+      function saveTask() {
+        const skillKey = document.getElementById("tm-skill").value;
+        const label = document.getElementById("tm-label").value.trim();
+        const time = document.getElementById("tm-time").value;
+        const isRep = document.getElementById("tm-repetitiva").checked;
+
+        let startDate, endDate, recurrence, days;
+
+        if (isRep) {
+          startDate = document.getElementById("tm-start").value;
+          const repType = document.getElementById("tm-rep-type").value;
+          endDate =
+            repType === "range"
+              ? document.getElementById("tm-end").value || null
+              : null;
+          recurrence = "weekly";
+          days = [...selectedDays].sort();
+
+          if (!startDate) {
+            NP_showToast("Elige una fecha de inicio.", "error");
+            return;
+          }
+          if (repType === "range" && !endDate) {
+            NP_showToast("Elige una fecha de fin.", "error");
+            return;
+          }
+          if (repType === "range" && startDate > endDate) {
+            NP_showToast(
+              "La fecha de inicio no puede ser posterior a la de fin.",
+              "error",
+            );
+            return;
+          }
+          if (!selectedDays.length) {
+            NP_showToast("Selecciona al menos un día de la semana.", "error");
+            return;
+          }
+        } else {
+          startDate = document.getElementById("tm-single-date").value;
+          endDate = null;
+          recurrence = "none";
+          days = [];
+
+          if (!startDate) {
+            NP_showToast("Elige una fecha.", "error");
+            return;
+          }
+        }
+
+        if (!label) {
+          NP_showToast("Escribe una etiqueta para la tarea.", "error");
+          return;
+        }
+        if (!skillKey) {
+          NP_showToast("Selecciona una actividad.", "error");
+          return;
+        }
+        if (!time) {
+          NP_showToast("Selecciona una hora.", "error");
+          return;
+        }
+
+        const task = {
+          id: editingTaskId || "task_" + Date.now(),
+          skillKey,
+          label,
+          time,
+          startDate,
+          endDate,
+          recurrence,
+          days,
+          color: selectedColor,
+          active: true,
+        };
+
+        // CHECK CONFLICTS!
+        const conflict = checkTaskConflict(task);
+        if (conflict) {
+          NP_showToast(
+            `Conflicto de horario: Ya hay una actividad asignada ("${conflict.label}") a las ${NP_formatTime(conflict.time)} en los días seleccionados.`,
+            "warning",
+          );
+          return;
+        }
+
+        const tasks = NP_getTasks();
+        if (editingTaskId) {
+          const idx = tasks.findIndex((t) => t.id === editingTaskId);
+          if (idx > -1) {
+            task.cancelledDates = tasks[idx].cancelledDates || [];
+            tasks[idx] = task;
+          }
+        } else {
+          tasks.push(task);
+        }
+
+        NP_setTasks(tasks);
+        taskModal.hide();
+        renderTaskList();
+        refreshAgendaViews();
+        NP_showToast(
+          editingTaskId ? "Tarea actualizada." : "¡Tarea creada exitosamente!",
+          "success",
+        );
+      }
+
+      // ── Custom styled confirm dialog ────────────────────────────
+      let _npConfirmCallback = null;
+      function NP_confirm(
+        msg,
+        onConfirm,
+        {
+          title = "Confirmar",
+          icon = "⚠️",
+          okLabel = "Eliminar",
+          okColor = "var(--np-pink)",
+        } = {},
+      ) {
+        document.getElementById("np-confirm-icon").textContent = icon;
+        document.getElementById("np-confirm-title").textContent = title;
+        document.getElementById("np-confirm-msg").textContent = msg;
+        const okBtn = document.getElementById("np-confirm-ok");
+        okBtn.textContent = okLabel;
+        okBtn.style.background = okColor;
+        _npConfirmCallback = onConfirm;
+        document.getElementById("np-confirm-backdrop").style.display = "flex";
+      }
+      (function initNPConfirm() {
+        // Wire confirm buttons after DOM ready
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", _bindNPConfirm);
+        } else {
+          _bindNPConfirm();
+        }
+        function _bindNPConfirm() {
+          document
+            .getElementById("np-confirm-ok")
+            .addEventListener("click", () => {
+              document.getElementById("np-confirm-backdrop").style.display =
+                "none";
+              if (_npConfirmCallback) {
+                _npConfirmCallback();
+                _npConfirmCallback = null;
+              }
+            });
+          document
+            .getElementById("np-confirm-cancel")
+            .addEventListener("click", () => {
+              document.getElementById("np-confirm-backdrop").style.display =
+                "none";
+              _npConfirmCallback = null;
+            });
+          document
+            .getElementById("np-confirm-backdrop")
+            .addEventListener("click", (e) => {
+              if (e.target.id === "np-confirm-backdrop") {
+                document.getElementById("np-confirm-backdrop").style.display =
+                  "none";
+                _npConfirmCallback = null;
+              }
+            });
+        }
+      })();
+
+      // ── Mobile week strip ─────────────────────────────────────────
+      function buildMobileWeekStrip() {
+        const strip = document.getElementById("mobile-week-strip");
+        if (!strip) return;
+        strip.innerHTML = "";
+        const todayStr = new Date().toISOString().slice(0, 10);
+        // Show 4 weeks centered: -7 to +20 days
+        for (let offset = -7; offset <= 20; offset++) {
+          const d = new Date();
+          d.setDate(d.getDate() + offset);
+          const dateStr = d.toISOString().slice(0, 10);
+          const dayName = d
+            .toLocaleDateString("es-MX", { weekday: "short" })
+            .replace(".", "")
+            .substring(0, 2);
+          const dayNum = d.getDate();
+          const isToday = dateStr === todayStr;
+          const isSelected = dateStr === viewDate;
+          const hasTasks = NP_getTasksForDateCaregiver(dateStr).length > 0;
+          const pill = document.createElement("div");
+          pill.className = `mws-day${isToday ? " today" : ""}${isSelected ? " selected" : ""}`;
+          pill.dataset.date = dateStr;
+          pill.innerHTML = `<span class="mws-name">${dayName}</span><span class="mws-num">${dayNum}</span>${hasTasks ? '<span class="mws-dot"></span>' : '<span style="height:5px;"></span>'}`;
+          pill.addEventListener("click", () => {
+            viewDate = dateStr;
+            buildMobileWeekStrip();
+            refreshAgendaViews();
+            setTimeout(
+              () =>
+                pill.scrollIntoView({
+                  behavior: "smooth",
+                  block: "nearest",
+                  inline: "center",
+                }),
+              50,
+            );
+          });
+          strip.appendChild(pill);
+        }
+        // Auto-scroll to selected
+        const sel = strip.querySelector(".selected");
+        if (sel)
+          setTimeout(
+            () =>
+              sel.scrollIntoView({
+                behavior: "instant",
+                block: "nearest",
+                inline: "center",
+              }),
+            0,
+          );
+      }
+
+      function deleteTask(id) {
+        NP_setTasks(NP_getTasks().filter((t) => t.id !== id));
+        renderTaskList();
+        refreshAgendaViews();
+        NP_showToast("Tarea eliminada.", "info");
+      }
+
+      function deletePermanently(id) {
+        if (
+          confirm(
+            "¿Estás seguro de que deseas eliminar permanentemente esta actividad del horario? Esta acción borrará todas sus ocurrencias.",
+          )
+        ) {
+          deleteTask(id);
+        }
+      }
+
+      // Safe wrapper called from inline onclick (avoids nested quote issues in template strings)
+      function deleteTaskById(id) {
+        const t = NP_getTasks().find((x) => x.id === id);
+        if (!t) return;
+        const isSeries = t.recurrence !== "none";
+        const msg = isSeries
+          ? `Esto borrará todas las ocurrencias de "${t.label}" de forma permanente.`
+          : `Se eliminará "${t.label}" de forma permanente.`;
+        NP_confirm(msg, () => deleteTask(id), {
+          title: isSeries ? "Eliminar serie completa" : "Eliminar actividad",
+          icon: "🗑️",
+          okLabel: "Sí, eliminar",
+          okColor: "var(--np-pink)",
+        });
+      }
+
+      function toggleTaskActive(id) {
+        const tasks = NP_getTasks();
+        const t = tasks.find((x) => x.id === id);
+        if (t) t.active = !t.active;
+        NP_setTasks(tasks);
+        renderTaskList();
+        refreshAgendaViews();
+        NP_showToast(t.active ? "Tarea activada." : "Tarea pausada.", "info");
+      }
+
+      // ── Task list render ──────────────────────────
+      function renderTaskList() {
+        const container = document.getElementById("task-list");
+        const search = document
+          .getElementById("task-search")
+          .value.toLowerCase();
+        const recFilter = document.getElementById("task-filter-rec").value;
+        const tasks = NP_getTasks();
+        const routines = NP_getRoutines();
+        let visible = tasks.filter((t) => {
+          if (search && !t.label.toLowerCase().includes(search)) return false;
+          if (recFilter && t.recurrence !== recFilter) return false;
+          return true;
+        });
+
+        document.getElementById("task-count-badge").textContent =
+          `${visible.length} tareas`;
+        container.innerHTML = "";
+
+        if (!visible.length) {
+          container.innerHTML = `<div class="col-12 text-center py-4" style="color:var(--np-text-muted);">
+      <i class="fas fa-calendar-xmark mb-2 d-block" style="font-size:1.5rem;"></i>No hay tareas. Crea la primera con "+ Nueva Tarea"
+    </div>`;
+          return;
+        }
+
+        visible.forEach((t) => {
+          const r = routines[t.skillKey];
+          const icon = r ? r.icon : "📌";
+          const recLabel = NP_recurrenceLabel(t);
+          const col = document.createElement("div");
+          col.className = "col-md-6";
+          col.innerHTML = `
+      <div class="task-card ${!t.active ? "opacity-50" : ""}">
+        <div class="tc-bar" style="background:${t.color};"></div>
+        <div style="padding-left:.5rem;">
+          <div class="tc-time">
+            <i class="fas fa-clock" style="color:${t.color};"></i>
+            ${NP_formatTime(t.time)} · ${recLabel}
+          </div>
+          <div class="tc-title">${icon} ${t.label}</div>
+          <div class="tc-rec" style="margin-top:.2rem;font-size:.7rem;color:var(--np-text-muted);">
+            ${r ? r.name : t.skillKey} · ${r ? r.steps.length : "?"} pasos
+          </div>
+          <div class="tc-actions">
+            <button onclick="openTaskModal('${t.id}')" class="btn btn-sm fw-bold" style="border-radius:9px;background:rgba(59,130,246,.1);color:var(--np-blue);border:none;font-size:.72rem;">
+              <i class="fas fa-pen me-1"></i>Editar
+            </button>
+            <button onclick="toggleTaskActive('${t.id}')" class="btn btn-sm fw-bold" style="border-radius:9px;background:rgba(16,185,129,.1);color:var(--np-green);border:none;font-size:.72rem;">
+              <i class="fas ${t.active ? "fa-pause" : "fa-play"} me-1"></i>${t.active ? "Pausar" : "Activar"}
+            </button>
+            <button onclick="deletePermanently('${t.id}')" class="btn btn-sm fw-bold" style="border-radius:9px;background:rgba(244,63,94,.1);color:var(--np-pink);border:none;font-size:.72rem;">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>`;
+          container.appendChild(col);
+        });
+      }
+
+      // ── Today timeline & Grid Views ────────────────────────────
+      function switchAgendaView(mode) {
+        document.getElementById("today-timeline").style.display =
+          mode === "list" ? "block" : "none";
+        document.getElementById("week-grid-view").style.display =
+          mode === "week-grid" ? "block" : "none";
+        if (mode === "week-grid") renderWeekGrid();
+      }
+
+      function shiftDay(n) {
+        if (n === 0) {
+          viewDate = new Date().toISOString().slice(0, 10);
+        } else {
+          const d = new Date(viewDate + "T12:00:00");
+          d.setDate(d.getDate() + n);
+          viewDate = d.toISOString().slice(0, 10);
+        }
+        refreshAgendaViews();
+      }
+
+      function refreshAgendaViews() {
+        const currentMode = document.getElementById("agenda-view-mode").value;
+        renderTodayTimeline();
+        if (currentMode === "week-grid") renderWeekGrid();
+        buildMobileWeekStrip();
+      }
+
+      function NP_getTasksForDateCaregiver(dateStr) {
+        const tasks = NP_getTasks();
+        const d = new Date(dateStr + "T12:00:00");
+        const dayOfWeek = d.getDay(); // 0=Dom
+        const today = dateStr;
+
+        return tasks
+          .filter((t) => {
+            if (!t.active) return false;
+            if (t.startDate && t.startDate > today) return false;
+            if (t.endDate && t.endDate < today) return false;
+            if (t.recurrence === "none") return t.startDate === today;
+            if (t.recurrence === "daily") return true;
+            if (t.recurrence === "weekly")
+              return (t.days || []).includes(dayOfWeek);
+            if (t.recurrence === "monthly") {
+              const startDay = parseInt((t.startDate || "").split("-")[2] || 1);
+              return d.getDate() === startDay;
+            }
+            return false;
+          })
+          .map((t) => {
+            const copy = { ...t };
+            copy.isCancelled =
+              t.cancelledDates && t.cancelledDates.includes(today);
+            return copy;
+          })
+          .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+      }
+
+      function renderTodayTimeline() {
+        const tasks = NP_getTasksForDateCaregiver(viewDate);
+        const routines = NP_getRoutines();
+        const now = new Date();
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const isToday = viewDate === todayStr;
+        const d = new Date(viewDate + "T12:00:00");
+
+        document.getElementById("today-label").textContent =
+          d.toLocaleDateString("es-MX", {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+          });
+
+        const container = document.getElementById("today-timeline");
+        container.innerHTML = "";
+
+        if (!tasks.length) {
+          container.innerHTML = `<div class="text-center py-4" style="color:var(--np-text-muted);font-size:.82rem;">
+      <i class="fas fa-moon mb-2 d-block" style="font-size:1.5rem;"></i>Sin tareas para este día.
+    </div>`;
+          return;
+        }
+
+        tasks.forEach((t) => {
+          const r = routines[t.skillKey];
+          const execs = NP_getExecutionsForTaskDate(t.id, viewDate);
+          const [h, m] = (t.time || "00:00").split(":").map(Number);
+          const taskDT = new Date(
+            viewDate +
+              `T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`,
+          );
+          const isPast = isToday && now > taskDT;
+          const isDone = execs.length > 0;
+
+          let relLabel = "";
+          if (isToday && !t.isCancelled) {
+            const diff = Math.round((taskDT - now) / 60000);
+            if (diff > 0)
+              relLabel = `en ${diff < 60 ? diff + "min" : Math.round(diff / 60) + "h"}`;
+            else if (diff > -60) relLabel = `hace ${Math.abs(diff)}min`;
+            else relLabel = `completado`;
+          }
+
+          const div = document.createElement("div");
+          div.className = "timeline-item";
+
+          // Right-side action buttons
+          let actionBtns = "";
+          if (t.isCancelled) {
+            // Cancelled: show Restaurar + Eliminar Serie
+            actionBtns = `
+        <button onclick="event.stopPropagation(); restoreTaskForDate('${t.id}', '${viewDate}')" class="btn btn-sm fw-bold py-1 px-2 border-0" style="border-radius:10px; font-size:.7rem; background:rgba(16,185,129,.1); color:var(--np-green);" title="Restaurar para este día">
+          <i class="fas fa-rotate-left"></i> Restaurar
+        </button>
+        <button onclick="event.stopPropagation(); deleteTaskById('${t.id}')" class="btn btn-sm fw-bold py-1 px-2 border-0" style="border-radius:10px; font-size:.7rem; background:rgba(244,63,94,.1); color:var(--np-pink);" title="Eliminar serie completa">
+          <i class="fas fa-trash"></i>
+        </button>`;
+          } else {
+            // Active: show Calificar + Cancelar (no delete yet)
+            actionBtns = `
+        <button onclick="event.stopPropagation(); createNewExecutionForGrading('${t.id}', '${t.skillKey}', '${viewDate}')" class="btn btn-sm fw-bold border-0" style="border-radius:10px;background:${t.color}18;color:${t.color};font-size:.7rem;" title="Calificar actividad">
+          <i class="fas fa-clipboard-check"></i> Calificar
+        </button>
+        <button onclick="event.stopPropagation(); cancelTaskForDate('${t.id}', '${viewDate}')" class="btn btn-sm fw-bold py-1 px-2 border-0" style="border-radius:10px; font-size:.7rem; background:rgba(249,115,22,.1); color:var(--np-orange);" title="Cancelar para este día">
+          <i class="fas fa-ban"></i>
+        </button>`;
+          }
+
+          div.innerHTML = `
+      <div class="d-flex flex-column align-items-center" style="min-width:46px; ${t.isCancelled ? "opacity: 0.55;" : ""}">
+        <div class="tl-dot" style="background:${t.isCancelled ? "#94a3b8" : isDone ? "var(--np-green)" : isPast ? "rgba(244,63,94,.3)" : t.color}; ${isDone && !t.isCancelled ? "box-shadow:0 0 0 2px var(--np-green)" : ""}"></div>
+        <div class="tl-time text-center">${NP_formatTime(t.time)}</div>
+      </div>
+      <div class="tl-card ${isDone && !t.isCancelled ? "tl-done" : ""} cursor-pointer" onclick="openTaskModal('${t.id}', '${viewDate}')" style="${t.isCancelled ? "opacity: 0.6; background: rgba(0,0,0,0.03);" : ""}">
+        <div class="d-flex align-items-start justify-content-between gap-2">
+          <div class="flex-grow-1">
+            <div class="tl-title">${r ? r.icon : "📌"} ${t.label} ${t.isCancelled ? ' <span class="badge bg-secondary" style="text-decoration:none;">Cancelada</span>' : ""}</div>
+            <div class="tl-sub">${NP_recurrenceLabel(t)} · ${r ? r.steps.length : "?"} pasos ${relLabel && !t.isCancelled ? `· <span style="color:${isPast && !isDone ? "var(--np-orange)" : "var(--np-text-muted)"}">${relLabel}</span>` : ""}</div>
+          </div>
+          <div class="d-flex align-items-center gap-1" onclick="event.stopPropagation()">
+            ${actionBtns}
+          </div>
+        </div>
+        <!-- Executions today -->
+        ${
+          execs.length > 0 && !t.isCancelled
+            ? `
+        <div class="tl-executions">
+          ${execs
+            .map((e, i) => {
+              const isPending = e.caregiver === "Tomás (Alumno)";
+              return `
+              <button class="tl-exec-badge" style="background:${isPending ? "rgba(249,115,22,.12)" : e.score >= 75 ? "rgba(16,185,129,.1)" : e.score >= 50 ? "rgba(249,115,22,.1)" : "rgba(244,63,94,.1)"};color:${isPending ? "var(--np-orange)" : e.score >= 75 ? "var(--np-green)" : e.score >= 50 ? "var(--np-orange)" : "var(--np-pink)"}; border:${isPending ? "1px dashed var(--np-orange)" : "1px solid var(--np-border)"}; cursor:pointer;" onclick="event.stopPropagation(); showExecDetail('${e.id}')" title="${isPending ? "Pendiente de calificar clínicamente" : "Calificado por " + e.caregiver}">
+                <i class="fas ${isPending ? "fa-triangle-exclamation" : "fa-check-circle"} me-1"></i>${e.time} · ${isPending ? "Calificar" : e.score + "%"}
+              </button>`;
+            })
+            .join("")}
+          <span style="font-size:.65rem;color:var(--np-text-muted);align-self:center;">${execs.length} ejecución${execs.length > 1 ? "es" : ""}</span>
+        </div>`
+            : !isDone && isPast && !t.isCancelled
+              ? `<div style="font-size:.68rem;color:var(--np-orange);margin-top:.4rem;"><i class="fas fa-circle-exclamation me-1"></i>Sin registrar</div>`
+              : ""
+        }
+      </div>`;
+          container.appendChild(div);
+        });
+      }
+
+      function renderTodayGrid() {
+        const container = document.getElementById("today-grid-view");
+        container.innerHTML = "";
+
+        const tasks = NP_getTasksForDateCaregiver(viewDate);
+        const routines = NP_getRoutines();
+
+        const hours = [
+          "07:00",
+          "08:00",
+          "09:00",
+          "10:00",
+          "11:00",
+          "12:00",
+          "13:00",
+          "14:00",
+          "15:00",
+          "16:00",
+          "17:00",
+          "18:00",
+          "19:00",
+          "20:00",
+          "21:00",
+        ];
+
+        const table = document.createElement("table");
+        table.className = "table table-bordered align-middle mb-0";
+        table.style.fontSize = "0.8rem";
+        table.innerHTML = `
+    <thead>
+      <tr class="table-light">
+        <th style="width:90px;" class="text-center">Hora</th>
+        <th>Actividades (Pulsa en una hora libre para agregar)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+        const tbody = table.querySelector("tbody");
+
+        hours.forEach((hour) => {
+          const [hHour] = hour.split(":").map(Number);
+          const hourTasks = tasks.filter((t) => {
+            const [th] = t.time.split(":").map(Number);
+            return th === hHour;
+          });
+
+          let tasksHtml = "";
+          hourTasks.forEach((t) => {
+            const r = routines[t.skillKey];
+            const icon = r ? r.icon : "📌";
+            const color = t.color || "#a855f7";
+            const execs = NP_getExecutionsForTaskDate(t.id, viewDate);
+            const isDone = execs.length > 0;
+
+            let execsHtml = "";
+            if (isDone) {
+              execsHtml = execs
+                .map((e) => {
+                  const isPending = e.caregiver === "Tomás (Alumno)";
+                  return `
+            <div onclick="event.stopPropagation(); showExecDetail('${e.id}')" class="badge mt-1 text-white cursor-pointer d-block text-truncate" style="background:rgba(255,255,255,0.25); border: ${isPending ? "1px dashed #fbbf24" : "none"}; font-size:0.6rem;" title="${isPending ? "Pendiente Calificar" : "Calificado por " + e.caregiver}">
+              ${isPending ? "⚠️ Calificar" : "✅ " + e.score + "% (" + e.caregiver.split(" ")[0] + ")"}
+            </div>
+          `;
+                })
+                .join("");
+            }
+
+            tasksHtml += `
+        <div class="p-2 mb-1 rounded position-relative text-white cursor-pointer" style="background:${color}; ${t.isCancelled ? "opacity: 0.45; text-decoration: line-through;" : ""}" onclick="event.stopPropagation(); openTaskModal('${t.id}')">
+          <div class="fw-bold d-flex justify-content-between align-items-center">
+            <span>${icon} ${t.label}</span>
+            <span class="small" style="font-size: 0.65rem;">${NP_formatTime(t.time)}</span>
+          </div>
+          <div class="mt-1 d-flex flex-wrap justify-content-between align-items-center">
+            <span class="small" style="font-size: 0.65rem;">${isDone ? "" : t.isCancelled ? "🚫 Cancelada" : "⏳ Pendiente"}</span>
+            <div class="d-flex align-items-center gap-1">
+              ${
+                t.isCancelled
+                  ? `<button onclick="event.stopPropagation(); restoreTaskForDate('${t.id}', '${viewDate}')" class="btn btn-xs btn-light py-0 px-2 fw-bold text-success border-0" style="font-size:0.6rem; border-radius:6px;">Restaurar</button>`
+                  : `<button onclick="event.stopPropagation(); cancelTaskForDate('${t.id}', '${viewDate}')" class="btn btn-xs btn-dark py-0 px-2 fw-bold text-danger border-0" style="font-size:0.6rem; border-radius:6px; background:rgba(0,0,0,0.3);">Cancelar</button>
+                   <button onclick="event.stopPropagation(); deletePermanently('${t.id}')" class="btn btn-xs btn-danger py-0 px-2 fw-bold border-0" style="font-size:0.6rem; border-radius:6px; background:rgba(244,63,94,0.7);"><i class="fas fa-trash"></i></button>`
+              }
+            </div>
+          </div>
+          ${execsHtml}
+        </div>`;
+          });
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+      <td class="fw-bold text-muted text-center">${NP_formatTime(hour)}</td>
+      <td style="min-height: 45px; cursor: pointer;" onclick="openTaskModalForTime('${viewDate}', '${hour}')">${tasksHtml || '<span class="text-muted small opacity-50"><i class="fas fa-plus"></i> Añadir actividad</span>'}</td>
+    `;
+          tbody.appendChild(tr);
+        });
+
+        container.appendChild(table);
+      }
+
+      function renderWeekGrid() {
+        const container = document.getElementById("week-grid-view");
+        container.innerHTML = "";
+
+        const curr = new Date(viewDate + "T12:00:00");
+        const day = curr.getDay();
+        const distanceToMonday = day === 0 ? -6 : 1 - day;
+        const monday = new Date(curr);
+        monday.setDate(curr.getDate() + distanceToMonday);
+
+        const hours = [
+          "07:00",
+          "09:00",
+          "11:00",
+          "13:00",
+          "15:00",
+          "17:00",
+          "19:00",
+          "21:00",
+        ];
+        const routines = NP_getRoutines();
+
+        const table = document.createElement("table");
+        table.className = "table table-bordered align-middle mb-0";
+        table.style.fontSize = "0.72rem";
+        table.style.tableLayout = "fixed";
+        table.style.borderColor = "var(--np-border)";
+
+        const todayStr = new Date().toISOString().slice(0, 10);
+        let headerHtml = `<tr style="background:var(--np-bg);"><th style="width:72px; border-color:var(--np-border); color:var(--np-text-muted); font-size:0.6rem; text-align:center;">Hora</th>`;
+        for (let i = 0; i < 7; i++) {
+          const loopDate = new Date(monday);
+          loopDate.setDate(monday.getDate() + i);
+          const dayName = loopDate.toLocaleDateString("es-MX", {
+            weekday: "short",
+          });
+          const dayNum = loopDate.getDate();
+          const loopDateStr = loopDate.toISOString().slice(0, 10);
+          const isColToday = loopDateStr === todayStr;
+
+          headerHtml += `<th style="border-color:var(--np-border); text-align:center; padding:8px 4px; ${isColToday ? "background:rgba(168,85,247,0.10); border-bottom:2px solid var(--np-purple);" : "background:var(--np-bg);"}">
+      <span style="text-transform:uppercase; font-size:0.58rem; color:${isColToday ? "var(--np-purple)" : "var(--np-text-muted)"}; font-weight:700;">${dayName}</span><br>
+      <span style="font-weight:900; font-size:0.88rem; color:${isColToday ? "var(--np-purple)" : "var(--np-text)"}; line-height:1;">${dayNum}</span>
+    </th>`;
+        }
+        headerHtml += "</tr>";
+        table.innerHTML = `<thead>${headerHtml}</thead><tbody></tbody>`;
+
+        const tbody = table.querySelector("tbody");
+
+        hours.forEach((hour) => {
+          const [hHour] = hour.split(":").map(Number);
+          let rowHtml = `<td class="fw-bold text-center" style="font-size:0.65rem; color:var(--np-text-muted); padding:6px 4px; vertical-align:middle;">${NP_formatTime(hour)}</td>`;
+
+          for (let i = 0; i < 7; i++) {
+            const loopDate = new Date(monday);
+            loopDate.setDate(monday.getDate() + i);
+            const loopDateStr = loopDate.toISOString().slice(0, 10);
+            const isColToday =
+              loopDateStr === new Date().toISOString().slice(0, 10);
+
+            const tasks = NP_getTasksForDateCaregiver(loopDateStr);
+            const cellTasks = tasks.filter((t) => {
+              const [th] = t.time.split(":").map(Number);
+              return th === hHour || th === hHour + 1;
+            });
+
+            let cellHtml = "";
+            cellTasks.forEach((t) => {
+              const r = routines[t.skillKey];
+              const icon = r ? r.icon : "📌";
+              const color = t.color || "#a855f7";
+              const execs = NP_getExecutionsForTaskDate(t.id, loopDateStr);
+              const isDone = execs.length > 0;
+
+              // Execution badges (click to grade)
+              let execsHtml = "";
+              if (isDone) {
+                execsHtml = execs
+                  .map((e) => {
+                    const isPending = e.caregiver === "Tomás (Alumno)";
+                    return `<div onclick="event.stopPropagation(); showExecDetail('${e.id}')" class="mt-1 text-truncate" style="background:rgba(255,255,255,0.22); border-radius:5px; padding:1px 4px; font-size:0.5rem; cursor:pointer; border:${isPending ? "1px dashed rgba(251,191,36,.7)" : "none"};" title="${isPending ? "Pendiente Calificar" : "Calificado: " + e.score + "%"}">${isPending ? "⚠️ Calificar" : "✅ " + e.score + "%"}</div>`;
+                  })
+                  .join("");
+              }
+
+              // Status indicator dot
+              const statusDot = t.isCancelled
+                ? `<span style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.4);display:inline-block;flex-shrink:0;"></span>`
+                : isDone
+                  ? `<span style="width:6px;height:6px;border-radius:50%;background:#ffffff;display:inline-block;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,0.2);"></span>`
+                  : `<span style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.45);display:inline-block;flex-shrink:0;border:1px dashed rgba(255,255,255,0.7);"></span>`;
+
+              cellHtml += `
+          <div class="mb-1 rounded cursor-pointer text-white" 
+               style="background:${color}; font-size:0.62rem; line-height:1.3; padding:5px 7px; transition:all .15s; ${t.isCancelled ? "opacity:0.42; text-decoration:line-through;" : ""}; box-shadow: 0 2px 6px ${color}55;"
+               title="${t.label} — ${NP_formatTime(t.time)}${t.isCancelled ? " (Cancelada)" : isDone ? " ✅ Completada" : " ⏳ Pendiente"}"
+               onclick="event.stopPropagation(); openTaskModal('${t.id}', '${loopDateStr}')"
+               onmouseenter="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px ${color}66';"
+               onmouseleave="this.style.transform=''; this.style.boxShadow='0 2px 6px ${color}55';">
+            <div class="d-flex align-items-center gap-1">
+              ${statusDot}
+              <span class="fw-bold text-truncate">${icon} ${t.label}</span>
+            </div>
+            <div style="opacity:0.85; margin-top:2px;">${NP_formatTime(t.time)}</div>
+            ${execsHtml}
+          </div>`;
+            });
+
+            const cellBg = isColToday
+              ? "background:rgba(168,85,247,0.04);"
+              : "";
+            rowHtml += `<td style="vertical-align:top; padding:4px; cursor:pointer; ${cellBg}" onclick="openTaskModalForTime('${loopDateStr}', '${hour}')">${cellHtml || '<span style="display:block;min-height:18px;"></span>'}</td>`;
+          }
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = rowHtml;
+          tbody.appendChild(tr);
+        });
+
+        container.appendChild(table);
+      }
+
+      function cancelTaskForDate(taskId, dateStr) {
+        const tasks = NP_getTasks();
+        const t = tasks.find((x) => x.id === taskId);
+        if (!t) return;
+        if (!t.cancelledDates) t.cancelledDates = [];
+        if (!t.cancelledDates.includes(dateStr)) {
+          t.cancelledDates.push(dateStr);
+        }
+        NP_setTasks(tasks);
+        refreshAgendaViews();
+        NP_showToast("Actividad cancelada para esta fecha.", "info");
+      }
+
+      function restoreTaskForDate(taskId, dateStr) {
+        const tasks = NP_getTasks();
+        const t = tasks.find((x) => x.id === taskId);
+        if (!t) return;
+        if (t.cancelledDates) {
+          t.cancelledDates = t.cancelledDates.filter((d) => d !== dateStr);
+        }
+        NP_setTasks(tasks);
+        refreshAgendaViews();
+        NP_showToast("Actividad restaurada para esta fecha.", "success");
+      }
+
+      // ── Clinic Grading flows ────────────────────
+      function createNewExecutionForGrading(taskId, skillKey, date) {
+        const r = NP_getRoutines()[skillKey];
+        if (!r) return;
+
+        const timeStr = new Date().toLocaleTimeString("es-MX", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const exec = {
+          id: "exec_tmp_" + Date.now(),
+          taskId: taskId,
+          skillKey: skillKey,
+          date: date,
+          time: timeStr,
+          caregiver: "Tomás (Alumno)",
+          completedByStudent: true,
+          steps: r.steps.map((s) => ({
+            stepId: s.id,
+            text: s.text,
+            icon: s.icon,
+            level: 1, // Independiente
+            value: 1.0,
+            label: "Independiente",
+          })),
+          score: 100.0,
+          max: r.steps.length,
+          obtained: r.steps.length,
+        };
+
+        const execs = NP_getExecutions();
+        execs.push(exec);
+        NP_setExecutions(execs);
+
+        startGrading(exec.id);
+      }
+
+      function startGrading(execId) {
+        const exec = NP_getExecutions().find((e) => e.id === execId);
+        if (!exec) return;
+
+        gradingExecId = execId;
+        gradingSupports = {};
+
+        if (exec.steps && exec.steps.length) {
+          exec.steps.forEach((s) => {
+            gradingSupports[s.stepId] = s.level;
+          });
+        }
+
+        renderGradingForm(exec);
+        execModal.show();
+      }
+
+      function renderGradingForm(exec) {
+        const r = NP_getRoutines()[exec.skillKey];
+        if (!r) return;
+
+        const network = NP_getNetwork();
+        let caregiverOpts = "";
+        network
+          .filter((m) => m.active)
+          .forEach((m) => {
+            const isSel = exec.caregiver === m.name ? "selected" : "";
+            caregiverOpts += `<option value="${m.name}" ${isSel}>${m.name} (${m.role})</option>`;
+          });
+
+        document.getElementById("execModalTitle").textContent =
+          `Calificar Rutina: ${r.icon} ${r.name}`;
+
+        let stepsHtml = "";
+        r.steps.forEach((step) => {
+          const current = gradingSupports[step.id] || 1;
+
+          stepsHtml += `
+      <div class="p-3 mb-2 border rounded-3" style="background:var(--np-bg); border-color:var(--np-border);">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span style="font-size:1.1rem;">${step.icon || "📌"}</span>
+          <strong style="font-size:.85rem;">Paso ${step.id}: ${step.text}</strong>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <button class="support-btn ${current === 1 ? "selected-1" : ""}" onclick="setGradingLevel(${step.id}, 1, '${exec.id}')">
+            Independiente
+          </button>
+          <button class="support-btn ${current === 2 ? "selected-2" : ""}" onclick="setGradingLevel(${step.id}, 2, '${exec.id}')">
+            Supervisión
+          </button>
+          <button class="support-btn ${current === 3 ? "selected-3" : ""}" onclick="setGradingLevel(${step.id}, 3, '${exec.id}')">
+            Ayuda Parcial
+          </button>
+          <button class="support-btn ${current === 4 ? "selected-4" : ""}" onclick="setGradingLevel(${step.id}, 4, '${exec.id}')">
+            Ayuda Total
+          </button>
+        </div>
+      </div>
+    `;
+        });
+
+        let obtained = 0;
+        const max = r.steps.length;
+        r.steps.forEach((step) => {
+          const lv = gradingSupports[step.id] || 1;
+          obtained += NP_SUPPORT_VALUES[lv];
+        });
+        const pct = parseFloat(((obtained / max) * 100).toFixed(2));
+
+        document.getElementById("exec-modal-body").innerHTML = `
+    <div class="mb-4">
+      <label class="np-label">Cuidador Evaluador</label>
+      <select id="grade-caregiver" class="np-input">
+        ${caregiverOpts || `<option value="Cuidador">Cuidador</option>`}
+      </select>
+    </div>
+    
+    <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);margin-bottom:.75rem;">
+      Nivel de Apoyo Requerido por Paso
+    </div>
+    
+    <div class="d-flex flex-column gap-1">
+      ${stepsHtml}
+    </div>
+    
+    <div class="d-flex align-items-center justify-content-between mt-4 p-3 border rounded-3" style="background:var(--np-bg);">
+      <div>
+        <div style="font-size:.65rem;color:var(--np-text-muted);text-transform:uppercase;">Porcentaje de Autonomía</div>
+        <div style="font-size:1.4rem;font-weight:900;color:var(--np-purple);" id="grade-live-pct">${pct}%</div>
+      </div>
+      <button class="btn-np-save py-2" onclick="saveGrading('${exec.id}')">
+        <i class="fas fa-save me-1"></i> Guardar Calificación
+      </button>
+    </div>
+  `;
+      }
+
+      function setGradingLevel(stepId, level, execId) {
+        gradingSupports[stepId] = level;
+        const exec = NP_getExecutions().find((e) => e.id === execId);
+        if (exec) {
+          renderGradingForm(exec);
+        }
+      }
+
+      function saveGrading(execId) {
+        const execs = NP_getExecutions();
+        const exec = execs.find((e) => e.id === execId);
+        if (!exec) return;
+
+        const caregiver = document.getElementById("grade-caregiver").value;
+        const r = NP_getRoutines()[exec.skillKey];
+        const max = r.steps.length;
+
+        let obtained = 0;
+        const steps = r.steps.map((step) => {
+          const level = gradingSupports[step.id] || 1;
+          obtained += NP_SUPPORT_VALUES[level];
+          return {
+            stepId: step.id,
+            text: step.text,
+            icon: step.icon,
+            level: level,
+            value: NP_SUPPORT_VALUES[level],
+            label: NP_SUPPORT_LABELS[level],
+          };
+        });
+
+        const score = parseFloat(((obtained / max) * 100).toFixed(2));
+
+        exec.steps = steps;
+        exec.score = score;
+        exec.max = max;
+        exec.obtained = parseFloat(obtained.toFixed(2));
+        exec.caregiver = caregiver;
+
+        NP_setExecutions(execs);
+
+        // Sync legacy history
+        const h = NP_getHistory();
+        const hIdx = h.findIndex(
+          (item) =>
+            item.date === exec.date &&
+            item.skill === exec.skillKey &&
+            Math.abs(item.score - exec.score) < 10.0,
+        );
+        if (hIdx > -1) {
+          h[hIdx].score = score;
+          h[hIdx].obtained = parseFloat(obtained.toFixed(2));
+          h[hIdx].caregiver = caregiver;
+        } else {
+          h.push({
+            date: exec.date,
+            skill: exec.skillKey,
+            score: score,
+            max: max,
+            obtained: parseFloat(obtained.toFixed(2)),
+            caregiver: caregiver,
+          });
+        }
+        NP_setHistory(h);
+
+        // Sync supports state
+        const supports = NP_getSupports();
+        const stepState = {};
+        steps.forEach((s) => {
+          stepState[s.stepId] = s.level;
+        });
+        supports[exec.skillKey] = stepState;
+        NP_setSupports(supports);
+
+        execModal.hide();
+        refreshAgendaViews();
+        NP_showToast("¡Calificación guardada correctamente!", "success");
+      }
+
+      function deleteExecutionRecord(execId) {
+        if (
+          confirm("¿Deseas eliminar este registro de ejecución del historial?")
+        ) {
+          const execs = NP_getExecutions().filter((e) => e.id !== execId);
+          NP_setExecutions(execs);
+          execModal.hide();
+          refreshAgendaViews();
+          NP_showToast("Registro de ejecución eliminado.", "info");
+        }
+      }
+
+      // ── Execution detail modal ────────────────────
+      function showExecDetail(execId) {
+        const exec = NP_getExecutions().find((e) => e.id === execId);
+        if (!exec) return;
+        const r = NP_getRoutines()[exec.skillKey];
+
+        document.getElementById("execModalTitle").textContent =
+          `${r ? r.icon : ""} ${r ? r.name : exec.skillKey} — ${exec.date} ${exec.time}`;
+        const pctColor =
+          exec.score >= 75
+            ? "var(--np-green)"
+            : exec.score >= 50
+              ? "var(--np-orange)"
+              : "var(--np-pink)";
+
+        let gradingBtn = "";
+        let deleteBtn = "";
+        const session = NP_getSession();
+        if (session && session.role === "cuidador") {
+          gradingBtn = `
+      <button class="btn btn-np-save w-100 py-2 mt-3" onclick="startGrading('${exec.id}')">
+        <i class="fas fa-clipboard-check me-2"></i> Calificar / Ajustar Apoyos Clínicos
+      </button>
+    `;
+          deleteBtn = `
+      <button class="btn btn-outline-danger w-100 py-2 mt-2" onclick="deleteExecutionRecord('${exec.id}')">
+        <i class="fas fa-trash-can me-2"></i> Eliminar Registro de Ejecución
+      </button>
+    `;
+        }
+
+        document.getElementById("exec-modal-body").innerHTML = `
+    <!-- Summary -->
+    <div class="d-flex align-items-center gap-4 mb-4 p-3" style="background:var(--np-bg);border-radius:14px;">
+      <div style="text-align:center;">
+        <div style="font-size:1.6rem;font-weight:900;color:${pctColor};">${exec.score}%</div>
+        <div style="font-size:.65rem;color:var(--np-text-muted);text-transform:uppercase;">Independencia</div>
+      </div>
+      <div>
+        <div style="font-size:.72rem;color:var(--np-text-muted);">
+          <strong>Cuidador:</strong> ${exec.caregiver || "—"} &nbsp;·&nbsp;
+          <strong>Por el alumno:</strong> ${exec.completedByStudent ? "✅ Sí" : "—"} &nbsp;·&nbsp;
+          <strong>Fórmula:</strong> ${exec.obtained?.toFixed(2)} ÷ ${exec.max} = ${exec.score}%
+        </div>
+        <div style="background:rgba(0,0,0,.06);border-radius:999px;height:8px;margin-top:.5rem;overflow:hidden;">
+          <div style="width:${exec.score}%;background:${pctColor};height:100%;border-radius:999px;"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Steps -->
+    <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--np-text-muted);margin-bottom:.75rem;">
+      <i class="fas fa-list-ol me-1" style="color:var(--np-purple);"></i> Detalle por Pictograma
+    </div>
+    <div class="d-flex flex-column gap-2 mb-3">
+      ${exec.steps
+        .map((s, i) => {
+          const c = NP_SUPPORT_COLORS[s.level] || "#64748b";
+          return `
+          <div class="d-flex align-items-center gap-3 p-2" style="background:var(--np-bg);border-radius:12px;border:1.5px solid ${c}33;">
+            <div style="width:28px;height:28px;border-radius:999px;background:${c};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0;">${i + 1}</div>
+            <span style="font-size:1.2rem;">${s.icon || "📌"}</span>
+            <div class="flex-grow-1">
+              <div style="font-size:.82rem;font-weight:700;">${s.text}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-size:.72rem;font-weight:800;color:${c};background:${c}18;padding:.2rem .65rem;border-radius:999px;">${s.label}</div>
+              <div style="font-size:.65rem;color:var(--np-text-muted);margin-top:.15rem;">${s.value?.toFixed(2)} pts</div>
+            </div>
+          </div>`;
+        })
+        .join("")}
+    </div>
+    ${gradingBtn}
+    ${deleteBtn}
+  `;
+
+        execModal.show();
+      }
+    </script>
+  </body>
+</html>

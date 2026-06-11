@@ -1,0 +1,22 @@
+{
+  "name": "NeuroPro — Autonomía Funcional",
+  "short_name": "NeuroPro",
+  "description": "Planificador de Autonomía Funcional escalable para TEA, TDAH y condiciones afines.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#f43f5e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
