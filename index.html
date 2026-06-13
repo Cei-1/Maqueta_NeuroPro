@@ -344,6 +344,10 @@
             Continuar <i class="fas fa-arrow-right ms-1"></i>
           </button>
         </form>
+        <div class="text-center mt-3">
+          <span class="small text-muted">¿Aún no tienes cuenta?</span>
+          <a href="registro.html" class="small fw-bold ms-1" style="color:var(--np-purple); text-decoration:none;">Crear registro</a>
+        </div>
       </div>
     </div>
 
@@ -394,9 +398,64 @@
 <script src="shared.js"></script>
 
 <script>
+  const NP_ACCOUNTS_KEY = 'NP_accounts_2026';
+
+  function NP_getAccounts() {
+    try {
+      return JSON.parse(localStorage.getItem(NP_ACCOUNTS_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function NP_isValidAccount(email, password) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const accounts = NP_getAccounts();
+    if (accounts.some(a => (a.email || '').toLowerCase() === normalizedEmail && a.password === password)) {
+      return true;
+    }
+    return password === 'neuropro2026' || password === '123456';
+  }
+
+  function NP_activateAccountContext(email, password) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const account = NP_getAccounts().find(a => (a.email || '').toLowerCase() === normalizedEmail && a.password === password);
+
+    if (account) {
+      if (account.profile) NP_setProfile(account.profile);
+      if (account.network) NP_setNetwork(account.network);
+      return;
+    }
+
+    NP_setProfile({
+      name: 'Tomás López',
+      age: 12,
+      diagnosis: 'TEA Nivel 1 (Síndrome de Asperger)',
+      communication: 'Verbal con apoyo visual',
+      photo: null,
+    });
+    NP_setNetwork([
+      { id: 1, name: 'María López', role: 'Madre', photo: null, active: true, pin: '1234' },
+      { id: 2, name: 'Carlos López', role: 'Padre', photo: null, active: true, pin: '1234' },
+      { id: 3, name: 'Dra. González', role: 'Terapeuta', photo: null, active: false, pin: '1234' },
+    ]);
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     NP_initSystem();
     NP_applyTheme();
+
+    const params = new URLSearchParams(window.location.search);
+    const registeredEmail = params.get('email');
+    if (registeredEmail) {
+      const emailInput = document.getElementById('login-email');
+      const passwordInput = document.getElementById('login-password');
+      if (emailInput) emailInput.value = registeredEmail;
+      if (passwordInput) passwordInput.value = '';
+    }
+    if (params.get('registered') === '1') {
+      NP_showToast('Cuenta creada correctamente. Ya puedes iniciar sesión.', 'success');
+    }
 
     // Si ya hay sesión activa, redirigir directamente
     const session = NP_getSession();
@@ -427,11 +486,12 @@
       return;
     }
     
-    // Contraseña general de la cuenta
-    if (password !== 'neuropro2026' && password !== '123456') {
+    if (!NP_isValidAccount(email, password)) {
       NP_showToast('Contraseña de cuenta incorrecta.', 'error');
       return;
     }
+
+    NP_activateAccountContext(email, password);
 
     // Show profiles selection
     document.getElementById('login-step-1').style.display = 'none';

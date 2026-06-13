@@ -151,7 +151,7 @@
       <img src="encabezado.png" alt="NeuroPro" class="np-header-img" />
       <div class="d-flex align-items-center gap-3">
         <span id="session-badge" class="np-pill" style="background:rgba(244,63,94,.1);color:var(--np-pink);">
-          <span style="width:7px;height:7px;border-radius:50%;background:var(--np-pink);"></span> Cargandoâ€¦
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--np-pink);"></span> Cargando...
         </span>
         <button id="btn-logout" onclick="NP_logout()" class="btn btn-sm fw-semibold" style="border-radius:10px;background:var(--np-pink-soft);color:var(--np-pink);border:1px solid rgba(244,63,94,.2);font-size:.75rem;display:none;">
           <i class="fas fa-right-from-bracket me-1"></i> Salir
@@ -183,17 +183,17 @@
             <!-- Search -->
             <div class="position-relative mb-3">
               <i class="fas fa-magnifying-glass position-absolute" style="left:1rem;top:50%;transform:translateY(-50%);color:var(--np-text-muted);font-size:.8rem;"></i>
-              <input type="text" id="search-skill" class="np-input" placeholder="Buscar actividadâ€¦" style="padding-left:2.5rem;" oninput="filterSkills()" />
+              <input type="text" id="search-skill" class="np-input" placeholder="Buscar actividad..." style="padding-left:2.5rem;" oninput="filterSkills()" />
             </div>
             <!-- Category select -->
             <div class="mb-4">
-              <label class="np-label" for="category-filter">Filtrar por CategorÃ­a</label>
+              <label class="np-label" for="category-filter">Filtrar por Categoría</label>
               <select id="category-filter" class="np-input" onchange="filterCategory(this.value)">
-                <option value="all">ðŸ“‚ Todas las categorÃ­as</option>
-                <option value="Vida Diaria">ðŸ§¼ Vida Diaria</option>
-                <option value="Rutina Escolar">ðŸŽ’ Escolar</option>
-                <option value="RegulaciÃ³n Emocional">ðŸŒ¬ï¸ RegulaciÃ³n</option>
-                <option value="Actividades Sociales">ðŸ¤ Actividades Sociales</option>
+                <option value="all">📂 Todas las categorías</option>
+                <option value="Vida Diaria">🧼 Vida Diaria</option>
+                <option value="Rutina Escolar">🎒 Rutina Escolar</option>
+                <option value="Regulación Emocional">🌬️ Regulación Emocional</option>
+                <option value="Actividades Sociales">🤝 Actividades Sociales</option>
               </select>
             </div>
             <!-- Skill grid -->
@@ -215,7 +215,7 @@
 <script>
 const CAT_COLORS = {
   'Vida Diaria':'var(--np-pink)','Rutina Escolar':'var(--np-blue)',
-  'RegulaciÃ³n Emocional':'var(--np-purple)','Actividades Sociales':'var(--np-green)',
+  'Regulación Emocional':'var(--np-purple)','Actividades Sociales':'var(--np-green)',
 };
 let currentSkillKey   = null;
 let currentCategory   = 'all';
@@ -395,7 +395,7 @@ function renderSkillDetailInto(container) {
       </div>
       <div class="d-flex align-items-center justify-content-between mb-4 pb-3" style="border-bottom:1px solid var(--np-border);">
         <div style="font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--np-text-muted);">
-          <i class="fas fa-pen-to-square me-1" style="color:var(--np-pink);"></i> Modo EdiciÃ³n
+          <i class="fas fa-pen-to-square me-1" style="color:var(--np-pink);"></i> Modo de edición
         </div>
         <button onclick="editorMode='view';refreshActiveContainer();" class="btn btn-sm" style="border-radius:10px;background:var(--np-bg);border:1px solid var(--np-border);font-size:.75rem;">
           <i class="fas fa-arrow-left me-1"></i> Ver
@@ -411,16 +411,16 @@ function renderSkillDetailInto(container) {
           <input class="np-input" type="text" id="ed-icon" value="${r.icon}" style="text-align:center;font-size:1.2rem;" oninput="liveUpdateField('icon',this.value)" />
         </div>
         <div class="col-6">
-          <label class="np-label">CategorÃ­a</label>
+          <label class="np-label">Categoría</label>
           <select class="np-input" id="ed-cat" onchange="liveUpdateField('category',this.value)">
-            <option value="Vida Diaria" ${r.category==='Vida Diaria'?'selected':''}>ðŸ§¼ Vida Diaria</option>
-            <option value="Rutina Escolar" ${r.category==='Rutina Escolar'?'selected':''}>ðŸŽ’ Escolar</option>
-            <option value="RegulaciÃ³n Emocional" ${r.category==='RegulaciÃ³n Emocional'?'selected':''}>ðŸŒ¬ï¸ RegulaciÃ³n</option>
-            <option value="Actividades Sociales" ${r.category==='Actividades Sociales'?'selected':''}>ðŸ¤ Actividades Sociales</option>
+            <option value="Vida Diaria" ${r.category==='Vida Diaria'?'selected':''}>🧼 Vida Diaria</option>
+            <option value="Rutina Escolar" ${r.category==='Rutina Escolar'?'selected':''}>🎒 Rutina Escolar</option>
+            <option value="Regulación Emocional" ${r.category==='Regulación Emocional'?'selected':''}>🌬️ Regulación Emocional</option>
+            <option value="Actividades Sociales" ${r.category==='Actividades Sociales'?'selected':''}>🤝 Actividades Sociales</option>
           </select>
         </div>
         <div class="col-6">
-          <label class="np-label">DescripciÃ³n breve</label>
+          <label class="np-label">Descripción breve</label>
           <input class="np-input" type="text" id="ed-desc" value="${r.description||''}" oninput="liveUpdateField('description',this.value)" />
         </div>
       </div>
@@ -451,7 +451,7 @@ function renderSkillDetailInto(container) {
                 <input class="np-input" type="text" value="${s.text||''}" placeholder="Nombre del paso" style="padding:.4rem .8rem;" oninput="updateStep(${s.id},'text',this.value)" />
               </div>
               <div class="col-12">
-                <textarea class="np-input" rows="2" placeholder="DescripciÃ³n clara para el alumnoâ€¦" style="resize:none;font-size:.78rem;" oninput="updateStep(${s.id},'description',this.value)">${s.description||''}</textarea>
+                <textarea class="np-input" rows="2" placeholder="Descripción clara para el alumno..." style="resize:none;font-size:.78rem;" oninput="updateStep(${s.id},'description',this.value)">${s.description||''}</textarea>
               </div>
             </div>
           </div>`).join('')}

@@ -4,381 +4,491 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="manifest" href="manifest.json" />
-  <title>NeuroPro — Mi Planificador</title>
-  <meta name="description" content="Tablero de misiones interactivo para el alumno. Secuencias visuales con pictogramas y voz." />
+  <title>NeuroPro - Mi Planificador</title>
+  <meta name="description" content="Agenda visual del alumno con actividades guiadas paso a paso." />
   <link rel="icon" type="image/png" href="logo.png" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    :root{--np-pink:#f43f5e;--np-pink-hover:#e11d48;--np-pink-soft:#fff1f2;--np-blue:#3b82f6;--np-blue-soft:#eff6ff;--np-purple:#a855f7;--np-green:#10b981;--np-orange:#f97316;--np-bg:#f0f4ff;--np-card:#ffffff;--np-border:#e2e8f0;--np-text:#0f172a;--np-text-muted:#64748b;--np-shadow:0 4px 24px rgba(0,0,0,.07);}
-    [data-bs-theme="dark"]{--np-bg:#090d16;--np-card:#111827;--np-border:#1e293b;--np-text:#f1f5f9;--np-text-muted:#94a3b8;--np-shadow:0 4px 24px rgba(0,0,0,.4);}
-    body{font-family:'Inter',sans-serif;background:var(--np-bg);color:var(--np-text);min-height:100vh;transition:background .3s,color .3s;}
-    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px;}
+    :root{
+      --np-pink:#f43f5e;
+      --np-pink-soft:#fff1f2;
+      --np-blue:#3b82f6;
+      --np-blue-soft:#eff6ff;
+      --np-purple:#a855f7;
+      --np-green:#10b981;
+      --np-orange:#f97316;
+      --np-bg:#f8fafc;
+      --np-card:#ffffff;
+      --np-border:#e2e8f0;
+      --np-text:#0f172a;
+      --np-text-muted:#64748b;
+      --np-shadow:0 4px 24px rgba(0,0,0,.07);
+      --np-panel-height:min(74vh, calc(100vh - 13.25rem));
+    }
+    [data-bs-theme="dark"]{
+      --np-bg:#090d16;
+      --np-card:#111827;
+      --np-border:#1e293b;
+      --np-text:#f1f5f9;
+      --np-text-muted:#94a3b8;
+      --np-shadow:0 4px 24px rgba(0,0,0,.4);
+    }
+    *{box-sizing:border-box;}
+    html,body{max-width:100%;overflow-x:hidden;}
+    body{
+      font-family:'Inter',sans-serif;
+      background:var(--np-bg);
+      color:var(--np-text);
+      min-height:100vh;
+      transition:background .3s,color .3s;
+    }
+    ::-webkit-scrollbar{width:6px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px;}
     [data-bs-theme="dark"] ::-webkit-scrollbar-thumb{background:#1f2937;}
 
     @keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
     @keyframes bounceIn{0%{transform:scale(.7);opacity:0;}60%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
-    @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
     @keyframes pulse-ring{0%{transform:scale(1);}50%{transform:scale(1.05);}100%{transform:scale(1);}}
 
-    .fade-in-up{animation:fadeInUp .5s ease-out both;}
+    .fade-in-up{animation:fadeInUp .45s ease-out both;}
     .bounce-in{animation:bounceIn .5s cubic-bezier(.34,1.56,.64,1) both;}
-    .delay-1{animation-delay:.08s;}.delay-2{animation-delay:.16s;}.delay-3{animation-delay:.24s;}
+    .delay-1{animation-delay:.08s;}
+    .delay-2{animation-delay:.16s;}
 
-    /* Header */
     .np-header{
-      background:rgba(255,255,255,.95);border-bottom:1px solid var(--np-border);
-      padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
-      position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);
+      background:var(--np-card);
+      border-bottom:1px solid var(--np-border);
+      padding:.9rem 1.4rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      position:sticky;
+      top:0;
+      z-index:100;
+      backdrop-filter:blur(12px);
     }
-    [data-bs-theme="dark"] .np-header{background:rgba(11,17,30,.95);}
     .np-header-img{max-height:46px;object-fit:contain;}
-    .np-card{background:var(--np-card);border:1px solid var(--np-border);border-radius:24px;box-shadow:var(--np-shadow);}
-    #toast-container{position:fixed;top:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none;}
+    .np-card{
+      background:var(--np-card);
+      border:1px solid var(--np-border);
+      border-radius:26px;
+      box-shadow:var(--np-shadow);
+    }
+    #toast-container{
+      position:fixed;top:1.5rem;right:1.5rem;z-index:9999;
+      display:flex;flex-direction:column;gap:.5rem;pointer-events:none;
+    }
     #toast-container .toast{pointer-events:auto;}
 
-    /* Mission cards (big, touch-friendly) */
-    .mission-card{
-      background:var(--np-card);border:3px solid var(--np-border);border-radius:28px;
-      padding:1.75rem 1.5rem;cursor:pointer;transition:all .25s;text-align:center;
-      position:relative;overflow:hidden;
-    }
-    .mission-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(59,130,246,.15);border-color:var(--np-blue);}
-    .mission-card:active{transform:scale(.97);}
-    .mission-card .mc-icon{
-      width:80px;height:80px;border-radius:24px;
-      display:flex;align-items:center;justify-content:center;
-      font-size:2.4rem;margin:0 auto 1rem;
-      box-shadow:0 6px 20px rgba(0,0,0,.1);
-      transition:transform .2s;
-    }
-    .mission-card:hover .mc-icon{transform:scale(1.1);}
-    .mission-card .mc-title{font-size:1.1rem;font-weight:900;line-height:1.2;margin-bottom:.5rem;}
-    .mission-card .mc-cat{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--np-text-muted);}
-    .mission-card .mc-steps{font-size:.78rem;color:var(--np-text-muted);margin-top:.5rem;}
-    .mission-card .mc-speak{
-      position:absolute;top:.85rem;right:.85rem;
-      width:38px;height:38px;border-radius:12px;
-      background:rgba(59,130,246,.1);color:var(--np-blue);border:none;
-      display:flex;align-items:center;justify-content:center;
-      font-size:.85rem;transition:all .2s;
-    }
-    .mission-card .mc-speak:hover{background:var(--np-blue);color:#fff;transform:scale(1.1);}
-
-    /* Step card (big pictogram) */
-    .step-card{
-      background:var(--np-card);border:3px solid var(--np-border);border-radius:36px;
-      padding:2.5rem 2rem;text-align:center;
-      box-shadow:0 8px 32px rgba(0,0,0,.08);min-height:420px;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-    }
-    .step-pictogram{
-      width:150px;height:150px;border-radius:36px;
-      background:var(--np-bg);border:2px solid var(--np-border);
-      display:flex;align-items:center;justify-content:center;
-      font-size:4.5rem;margin:0 auto 1.5rem;
-      box-shadow:inset 0 2px 8px rgba(0,0,0,.06);
-      animation:pulse-ring 2s ease-in-out infinite;
-    }
-    .step-title{font-size:1.8rem;font-weight:900;margin-bottom:.5rem;}
-    .step-desc{font-size:.9rem;color:var(--np-text-muted);max-width:400px;line-height:1.6;}
-
-    /* Progress dots */
-    .progress-dots{display:flex;gap:.6rem;justify-content:center;margin-bottom:1.5rem;}
-    .pdot{width:14px;height:14px;border-radius:50%;background:var(--np-border);transition:all .3s;}
-    .pdot.done{background:var(--np-green);}
-    .pdot.active{background:var(--np-blue);transform:scale(1.3);box-shadow:0 0 0 3px rgba(59,130,246,.25);}
-
-    /* Big action button */
-    .btn-big-action{
-      padding:1rem 2.5rem;border-radius:20px;font-size:1.1rem;font-weight:900;
-      background:var(--np-green);color:#fff;border:none;
-      box-shadow:0 6px 20px rgba(16,185,129,.35);transition:all .2s;
-    }
-    .btn-big-action:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(16,185,129,.45);color:#fff;}
-    .btn-big-action:active{transform:scale(.97);}
-    .btn-speak-step{
-      width:56px;height:56px;border-radius:16px;
-      background:rgba(59,130,246,.1);color:var(--np-blue);border:1px solid rgba(59,130,246,.2);
-      display:flex;align-items:center;justify-content:center;font-size:1.2rem;
-      transition:all .2s;
-    }
-    .btn-speak-step:hover{background:var(--np-blue);color:#fff;transform:scale(1.1);}
-    .btn-back-step{font-size:.82rem;font-weight:700;color:var(--np-text-muted);background:none;border:none;cursor:pointer;transition:color .2s;padding:.5rem 1rem;}
-    .btn-back-step:hover{color:var(--np-text);}
-
-    /* Success card */
-    .success-card{
-      background:linear-gradient(135deg,var(--np-blue),var(--np-purple),var(--np-pink));
-      border-radius:36px;padding:3rem 2rem;color:#fff;text-align:center;
-      box-shadow:0 12px 40px rgba(168,85,247,.4);min-height:420px;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-    }
-    .trophy-anim{animation:bounceIn .6s cubic-bezier(.34,1.56,.64,1) .2s both;}
-
-    /* Confetti */
-    .confetti-piece{
-      position:fixed;width:10px;height:10px;border-radius:2px;
-      animation:confettiFall linear forwards;
-      pointer-events:none;z-index:9999;
-    }
-
-    /* Welcome banner */
     .welcome-banner{
-      background:linear-gradient(135deg,var(--np-blue),var(--np-purple));
-      border-radius:24px;padding:1.5rem 2rem;color:#fff;
-      display:flex;align-items:center;gap:1.5rem;
-      margin-bottom:2rem;
+      background:linear-gradient(135deg,var(--np-blue-soft) 0%,#ffffff 52%,var(--np-pink-soft) 100%);
+      border:1px solid var(--np-border);
+      border-radius:28px;
+      padding:1.6rem 1.8rem;
+      color:var(--np-text);
+      display:flex;
+      align-items:center;
+      gap:1.15rem;
+      margin-bottom:1.5rem;
+      box-shadow:var(--np-shadow);
+    }
+    [data-bs-theme="dark"] .welcome-banner{
+      background:linear-gradient(135deg, rgba(59,130,246,.14) 0%, rgba(17,24,39,.98) 52%, rgba(168,85,247,.14) 100%);
     }
     .welcome-avatar{
-      width:72px;height:72px;border-radius:20px;
-      background:rgba(255,255,255,.25);
+      width:68px;height:68px;border-radius:20px;
+      background:linear-gradient(135deg,var(--np-blue),var(--np-purple));
       display:flex;align-items:center;justify-content:center;
-      font-size:2rem;flex-shrink:0;
-      border:2px solid rgba(255,255,255,.3);
+      font-size:1.7rem;flex-shrink:0;color:#fff;
+      box-shadow:0 10px 22px rgba(59,130,246,.22);
     }
 
-    /* Category filter pills */
-    .cat-pill{border-radius:999px;padding:.4rem 1rem;font-size:.75rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;background:var(--np-card);color:var(--np-text-muted);border:1.5px solid var(--np-border);}
-    .cat-pill:hover{background:rgba(59,130,246,.08);color:var(--np-blue);border-color:rgba(59,130,246,.3);}
-    .cat-pill.active{background:var(--np-blue);color:#fff;border-color:var(--np-blue);box-shadow:0 4px 12px rgba(59,130,246,.3);}
-
-    /* Empty state */
-    .empty-missions{text-align:center;padding:4rem 2rem;color:var(--np-text-muted);}
-
-    /* Theme btn */
     .btn-theme-float{
       position:fixed;bottom:1.5rem;right:1.5rem;z-index:200;
-      width:44px;height:44px;border-radius:14px;border:1px solid var(--np-border);
+      width:46px;height:46px;border-radius:14px;border:1px solid var(--np-border);
       background:var(--np-card);color:var(--np-text-muted);
       display:flex;align-items:center;justify-content:center;
       transition:all .2s;box-shadow:var(--np-shadow);cursor:pointer;
     }
-    .btn-theme-float:hover{transform:scale(1.1);}
+    .btn-theme-float:hover{transform:scale(1.05);}
 
-    /* Schedule view specific */
-    .schedule-tab {
-      background: var(--np-card);
-      border: 2px solid var(--np-border);
-      color: var(--np-text-muted);
-      font-size: 1rem;
-      font-weight: 800;
-      padding: .6rem 1.4rem;
-      transition: all .2s;
+    .schedule-shell{
+      background:var(--np-card);
+      border:1px solid var(--np-border);
+      border-radius:28px;
+      box-shadow:var(--np-shadow);
+      padding:1.35rem;
     }
-    .schedule-tab:hover {
-      border-color: var(--np-blue);
-      color: var(--np-blue);
+    .equal-panel{
+      height:clamp(740px, 86vh, 1040px);
+      min-height:clamp(740px, 86vh, 1040px);
+      max-height:clamp(740px, 86vh, 1040px);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
     }
-    .schedule-tab.active {
-      background: linear-gradient(135deg, var(--np-blue), var(--np-purple));
-      border-color: transparent;
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(59,130,246,.35);
+    .board-main > .equal-panel,
+    #free-skills-panel-mobile > .equal-panel{
+      flex:1 1 auto;
     }
-
-    .schedule-task-card {
-      background: var(--np-card);
-      border: 3px solid var(--np-border);
-      border-radius: 24px;
-      padding: 1.25rem 1.5rem;
-      transition: all .2s;
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      position: relative;
+    .schedule-tab{
+      background:var(--np-card);
+      border:2px solid var(--np-border);
+      color:var(--np-text-muted);
+      font-size:1rem;
+      font-weight:800;
+      padding:.65rem 1.3rem;
+      transition:all .2s;
     }
-    .schedule-task-card.completed {
-      border-color: var(--np-green);
-      background: rgba(16,185,129,.02);
+    .schedule-tab:hover{border-color:var(--np-blue);color:var(--np-blue);}
+    .schedule-tab.active{
+      background:linear-gradient(135deg,var(--np-blue),#60a5fa);
+      border-color:transparent;
+      color:#fff;
+      box-shadow:0 8px 18px rgba(59,130,246,.24);
     }
-    .schedule-task-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--np-shadow);
+    .btn-day-nav{
+      width:38px;height:38px;border-radius:50%;
+      border:1px solid var(--np-border);
+      background:var(--np-card);
+      color:var(--np-text-muted);
+      display:inline-flex;align-items:center;justify-content:center;
+      transition:all .2s;cursor:pointer;font-size:.85rem;padding:0;outline:none;
+      box-shadow:var(--np-shadow);
     }
-    .stc-indicator {
-      width: 6px;
-      position: absolute;
-      left: 0;
-      top: 1.25rem;
-      bottom: 1.25rem;
-      border-radius: 0 4px 4px 0;
+    .btn-day-nav:hover{
+      background:var(--np-blue);color:#fff;border-color:var(--np-blue);
+      transform:scale(1.05);box-shadow:0 10px 18px rgba(59,130,246,.22);
     }
-    .stc-icon-wrap {
-      width: 60px;
-      height: 60px;
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,.08);
-      flex-shrink: 0;
+    .board-shell{
+      max-width:1280px;
+      margin:0 auto;
     }
-    .stc-info {
-      flex-grow: 1;
+    .welcome-wrap{
+      margin-bottom:1.5rem;
     }
-    .stc-time {
-      font-size: .8rem;
-      font-weight: 800;
-      color: var(--np-text-muted);
+    .board-layout{
+      display:grid;
+      grid-template-columns:minmax(0, 1.6fr) minmax(360px, .95fr);
+      gap:1.5rem;
+      align-items:stretch;
     }
-    .stc-title {
-      font-size: 1.15rem;
-      font-weight: 900;
-      margin: .1rem 0;
+    .board-main,
+    .board-side{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
     }
-    .stc-meta {
-      font-size: .75rem;
-      color: var(--np-text-muted);
-      font-weight: 600;
+    .board-side{
+      position:sticky;
+      top:5.75rem;
     }
-    .stc-status-btn {
-      font-size: .85rem;
-      font-weight: 800;
-      border-radius: 14px;
-      padding: .6rem 1.2rem;
-      transition: all .2s;
+    #free-skills-panel-mobile{min-height:0;}
+    #schedule-day-container{
+      min-height:0;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
     }
-
-    /* Weekly Grid styles */
-    .week-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: .75rem;
-      align-items: stretch;
+    #schedule-day-container > *{
+      min-width:0;
+      min-height:0;
     }
-    @media (max-width: 992px) {
-      .week-grid {
-        grid-template-columns: 1fr;
-      }
+    .day-list-stack{
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+      flex:1 1 0;
+      min-height:0;
+      width:100%;
+      max-height:none;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding-right:.2rem;
+      align-items:flex-start;
     }
-    .week-day-col {
-      background: var(--np-card);
-      border: 2px solid var(--np-border);
-      border-radius: 20px;
-      padding: 1rem;
-      min-height: 150px;
-      display: flex;
-      flex-direction: column;
-      gap: .5rem;
-      transition: all .2s;
+    #schedule-next-task-highlight{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      flex:0 0 auto;
+      width:100%;
     }
-    .week-day-col.today {
-      border-color: var(--np-blue);
-      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    .next-task-card{
+      background:linear-gradient(135deg, var(--np-blue-soft), rgba(255,255,255,.98));
+      border:1px solid var(--np-border);
+      border-radius:28px;
+      box-shadow:var(--np-shadow);
+      width:100%;
+      max-width:760px;
     }
-    .wd-header {
-      font-size: .8rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      border-bottom: 1px solid var(--np-border);
-      padding-bottom: .4rem;
-      margin-bottom: .3rem;
-      display: flex;
-      justify-content: space-between;
+    [data-bs-theme="dark"] .next-task-card{
+      background:linear-gradient(135deg, rgba(59,130,246,.14), rgba(17,24,39,.98));
     }
-    .wd-task-pill {
-      font-size: .75rem;
-      font-weight: 700;
-      padding: .5rem .75rem;
-      border-radius: 12px;
-      background: var(--np-bg);
-      border: 1px solid var(--np-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: .5rem;
-      min-width: 0;
-      width: 100%;
-      cursor: pointer;
-      transition: all .15s;
+    .next-task-layout{
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) 160px;
+      gap:1rem;
+      align-items:center;
     }
-    .wd-task-pill:hover {
-      transform: translateY(-1px);
-      border-color: var(--np-blue);
-    }
-    .wd-task-pill.completed {
-      background: rgba(16,185,129,.08);
-      border-color: var(--np-green);
-      color: var(--np-green);
+    .next-task-action{
+      grid-column:3;
+      display:flex;
+      justify-content:flex-end;
     }
 
-    /* Month grid styles */
-    .month-calendar {
-      max-width: 450px;
-      margin: 0 auto 1.5rem;
-      background: var(--np-card);
-      border: 2px solid var(--np-border);
-      border-radius: 24px;
-      padding: 1.25rem;
+    .schedule-task-card{
+      background:var(--np-card);
+      border:1px solid var(--np-border);
+      border-radius:26px;
+      padding:1.1rem 1.15rem 1.1rem 1.3rem;
+      transition:all .2s;
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) 132px;
+      align-items:center;
+      gap:1rem;
+      position:relative;
+      box-shadow:var(--np-shadow);
+      width:100%;
+      max-width:760px;
     }
-    .mc-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      gap: 6px;
+    .schedule-task-card.completed{
+      border-color:rgba(16,185,129,.28);
+      background:linear-gradient(180deg, rgba(16,185,129,.08), rgba(16,185,129,.03));
     }
-    .mc-header-day {
-      font-size: .65rem;
-      font-weight: 800;
-      color: var(--np-text-muted);
-      text-transform: uppercase;
-      margin-bottom: 8px;
+    .schedule-task-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 16px 30px rgba(15,23,42,.10);
     }
-    .mc-day {
-      aspect-ratio: 1;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: .85rem;
-      font-weight: 700;
-      cursor: pointer;
-      position: relative;
-      transition: all .15s;
-      border: 2px solid transparent;
+    .stc-indicator{
+      width:6px;position:absolute;left:0;top:16px;bottom:16px;border-radius:0 8px 8px 0;
     }
-    .mc-day:hover {
-      background: var(--np-bg);
+    .stc-icon-wrap{
+      width:58px;height:58px;border-radius:20px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.8rem;color:#fff;box-shadow:0 10px 20px rgba(15,23,42,.12);flex-shrink:0;
     }
-    .mc-day.outside {
-      opacity: .25;
+    .stc-info{min-width:0;}
+    .stc-time{font-size:.76rem;font-weight:800;color:var(--np-text-muted);}
+    .stc-title{font-size:1.08rem;font-weight:900;margin:.18rem 0;}
+    .stc-meta{font-size:.8rem;color:var(--np-text-muted);font-weight:600;line-height:1.5;}
+    .stc-status-btn{
+      font-size:.82rem;font-weight:800;border-radius:16px;padding:.74rem 1rem;transition:all .2s;
+      box-shadow:0 10px 18px rgba(59,130,246,.22);
+      width:132px;
     }
-    .mc-day.today {
-      border-color: var(--np-blue);
+    .stc-action{
+      grid-column:3;
+      display:flex;
+      justify-content:flex-end;
+      align-self:center;
+      margin-top:0;
     }
-    .mc-day.selected {
-      background: linear-gradient(135deg, var(--np-blue), var(--np-purple));
-      color: #fff !important;
+    .schedule-view-switch{
+      display:flex;
+      gap:.55rem;
+      margin-bottom:1.15rem;
+      flex-wrap:wrap;
     }
-    .mc-dots {
-      display: flex;
-      gap: 2px;
-      position: absolute;
-      bottom: 4px;
+
+    .month-calendar{
+      max-width:none;margin:0 0 1.5rem;background:var(--np-card);
+      border:1px solid var(--np-border);border-radius:24px;padding:1.25rem;box-shadow:var(--np-shadow);
     }
-    .mc-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
+    .mc-grid{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:6px;}
+    .mc-header-day{
+      font-size:.65rem;font-weight:800;color:var(--np-text-muted);text-transform:uppercase;margin-bottom:8px;
     }
-    .btn-day-nav {
-      width: 38px; height: 38px; border-radius: 50%;
-      border: 1.5px solid var(--np-border); background: var(--np-card);
-      color: var(--np-text-muted); display: inline-flex; align-items: center; justify-content: center;
-      transition: all .2s; cursor: pointer; font-size: .85rem; padding: 0; outline: none;
+    .mc-day{
+      aspect-ratio:1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      font-size:.85rem;font-weight:700;cursor:pointer;position:relative;transition:all .15s;border:2px solid transparent;
     }
-    .btn-day-nav:hover {
-      background: var(--np-blue); color: #fff; border-color: var(--np-blue);
-      transform: scale(1.08); box-shadow: 0 4px 10px rgba(59,130,246,.3);
+    .mc-day:hover{background:var(--np-bg);}
+    .mc-day.outside{opacity:.25;}
+    .mc-day.today{border-color:var(--np-blue);}
+    .mc-day.selected{background:linear-gradient(135deg,var(--np-blue),#60a5fa);color:#fff !important;}
+    .mc-dots{display:flex;gap:2px;position:absolute;bottom:4px;}
+    .mc-dot{width:4px;height:4px;border-radius:50%;}
+
+    .free-skills-shell{
+      margin-bottom:1.5rem;
+      padding:1.4rem;
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
     }
-    .btn-day-nav:active {
-      transform: scale(.95);
+    .free-skills-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:1.1rem;
+      flex:1 1 auto;
+      min-height:0;
+      overflow:auto;
+      padding-right:.2rem;
+    }
+    .free-skills-copy{
+      font-size:.8rem;
+      color:var(--np-text-muted);
+      max-width:26ch;
+      line-height:1.55;
+    }
+    .free-skill-card{
+      background:var(--np-card);
+      border:1px solid var(--np-border);
+      border-radius:24px;
+      padding:1.2rem;
+      box-shadow:var(--np-shadow);
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
+      align-items:center;
+      gap:1rem;
+    }
+    [data-bs-theme="dark"] .free-skill-card{
+      background:linear-gradient(180deg, rgba(17,24,39,.98) 0%, rgba(15,23,42,.98) 100%);
+    }
+    .free-skill-icon{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.5rem;
+      color:#fff;
+      flex-shrink:0;
+      box-shadow:0 10px 20px rgba(15,23,42,.12);
+    }
+    .free-skill-info{
+      min-width:0;
+    }
+    .free-skill-title{
+      font-size:1rem;
+      font-weight:900;
+      line-height:1.3;
+      color:var(--np-text);
+      margin:0;
+    }
+    .free-skill-tag{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:.28rem .65rem;
+      font-size:.68rem;
+      font-weight:800;
+      background:var(--np-blue-soft);
+      color:var(--np-blue);
+      margin-top:.3rem;
+    }
+    [data-bs-theme="dark"] .free-skill-tag{
+      background:rgba(59,130,246,.16);
+      color:#bfdbfe;
+    }
+    .free-skill-desc{
+      font-size:.83rem;
+      line-height:1.55;
+      color:var(--np-text-muted);
+      margin:.45rem 0 0;
+    }
+    .free-skill-meta{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:.55rem;
+      min-width:132px;
+    }
+    .free-skill-steps{
+      font-size:.74rem;
+      font-weight:700;
+      color:var(--np-text-muted);
+      text-align:right;
+    }
+    .mobile-practice-toggle{
+      margin-bottom:1rem;
+    }
+    .mobile-practice-btn{
+      width:100%;
+      border:none;
+      border-radius:18px;
+      background:var(--np-card);
+      color:var(--np-text);
+      box-shadow:var(--np-shadow);
+      border:1px solid var(--np-border);
+      padding:1rem 1.1rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      text-align:left;
+    }
+    .mobile-practice-btn .toggle-chevron{
+      transition:transform .2s ease;
+      color:var(--np-purple);
+    }
+    .mobile-practice-btn[aria-expanded="true"] .toggle-chevron{
+      transform:rotate(180deg);
+    }
+
+    .step-card{
+      background:var(--np-card);border:2px solid var(--np-border);border-radius:36px;
+      padding:2.5rem 2rem;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.08);min-height:420px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+    }
+    .step-pictogram{
+      width:150px;height:150px;border-radius:36px;background:var(--np-bg);border:2px solid var(--np-border);
+      display:flex;align-items:center;justify-content:center;font-size:4.5rem;margin:0 auto 1.5rem;
+      box-shadow:inset 0 2px 8px rgba(0,0,0,.06);animation:pulse-ring 2s ease-in-out infinite;
+    }
+    .step-title{font-size:1.8rem;font-weight:900;margin-bottom:.5rem;}
+    .step-desc{font-size:.9rem;color:var(--np-text-muted);max-width:400px;line-height:1.6;}
+    .progress-dots{display:flex;gap:.6rem;justify-content:center;margin-bottom:1.5rem;}
+    .pdot{width:14px;height:14px;border-radius:50%;background:var(--np-border);transition:all .3s;}
+    .pdot.done{background:var(--np-green);}
+    .pdot.active{background:var(--np-blue);transform:scale(1.3);box-shadow:0 0 0 3px rgba(59,130,246,.20);}
+    .btn-big-action{
+      padding:1rem 2.5rem;border-radius:20px;font-size:1.05rem;font-weight:900;
+      background:var(--np-green);color:#fff;border:none;box-shadow:0 6px 20px rgba(16,185,129,.30);transition:all .2s;
+    }
+    .btn-big-action:hover{transform:translateY(-2px);color:#fff;}
+    .btn-speak-step{
+      width:56px;height:56px;border-radius:16px;background:rgba(59,130,246,.10);color:var(--np-blue);
+      border:1px solid rgba(59,130,246,.18);display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:all .2s;
+    }
+    .btn-back-step{font-size:.82rem;font-weight:700;color:var(--np-text-muted);background:none;border:none;cursor:pointer;transition:color .2s;padding:.5rem 1rem;}
+    .success-card{
+      background:linear-gradient(135deg,var(--np-blue),var(--np-purple),var(--np-pink));
+      border-radius:36px;padding:3rem 2rem;color:#fff;text-align:center;box-shadow:0 12px 40px rgba(143,140,232,.34);min-height:420px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+    }
+    .trophy-anim{animation:bounceIn .6s cubic-bezier(.34,1.56,.64,1) .2s both;}
+
+    @media (max-width: 991px){
+      .board-layout{grid-template-columns:1fr;}
+      .board-main,
+      .board-side,
+      #free-skills-panel-mobile{min-height:0;}
+      .board-side{position:static;order:-1;}
+      .equal-panel{height:auto;min-height:0;max-height:none;}
+      .day-list-stack{max-height:none;overflow:visible;padding-right:0;}
+      .free-skills-grid{grid-template-columns:1fr;overflow:visible;padding-right:0;}
+    }
+    @media (max-width: 767px){
+      .welcome-banner{padding:1.25rem 1.1rem;align-items:flex-start;}
+      .schedule-task-card{grid-template-columns:auto minmax(0,1fr);padding:1rem 1rem 1rem 1.15rem;}
+      .schedule-task-card .stc-status-btn,.schedule-task-card .badge{width:100%;justify-content:center;}
+      .stc-action{grid-column:1 / -1;}
+      .next-task-layout{grid-template-columns:auto minmax(0,1fr);}
+      .next-task-action{grid-column:1 / -1;}
+      .schedule-shell{padding:1rem;}
+      .free-skills-shell{padding:1rem;}
+      .free-skills-grid{grid-template-columns:1fr;}
+      .free-skill-card{grid-template-columns:auto minmax(0,1fr);}
+      .free-skill-meta{grid-column:1 / -1;align-items:stretch;min-width:0;}
+      .free-skill-steps{text-align:left;}
+      .next-task-card,
+      .schedule-task-card{max-width:none;}
     }
   </style>
 </head>
@@ -386,176 +496,163 @@
 
 <div id="toast-container"></div>
 
-<!-- Floating theme btn -->
 <button class="btn-theme-float border-0" onclick="NP_toggleTheme()" title="Cambiar tema">
   <i id="theme-icon" class="fas fa-moon"></i>
 </button>
 
-<!-- Header -->
 <header class="np-header">
   <img src="encabezado.png" alt="NeuroPro" class="np-header-img" />
   <div class="d-flex align-items-center gap-3">
     <span id="session-badge" style="font-size:.75rem;font-weight:700;color:var(--np-blue);">
-      <i class="fas fa-circle" style="font-size:.4rem;margin-right:.35rem;animation:pulse-ring 2s infinite;"></i> Cargando…
+      <i class="fas fa-circle" style="font-size:.4rem;margin-right:.35rem;animation:pulse-ring 2s infinite;"></i> Cargando...
     </span>
-    <button onclick="NP_logout()" class="btn btn-sm fw-bold" style="border-radius:10px;background:rgba(244,63,94,.08);color:var(--np-pink);border:1px solid rgba(244,63,94,.15);font-size:.72rem;">
+    <button onclick="NP_logout()" class="btn btn-sm fw-bold" style="border-radius:10px;background:var(--np-pink-soft);color:var(--np-pink);border:1px solid rgba(244,63,94,.12);font-size:.72rem;">
       <i class="fas fa-right-from-bracket me-1"></i> Salir
     </button>
   </div>
 </header>
 
-<!-- Main content -->
-<main class="py-4 px-3 px-md-4" style="max-width:960px;margin:0 auto;">
-
-  <!-- Board (mission grid & schedule) -->
+<main class="board-shell py-4 px-3 px-md-4">
   <div id="board-view">
-
-    <!-- Welcome banner -->
-    <div class="welcome-banner fade-in-up mb-4">
-      <div class="welcome-avatar" id="welcome-avatar">👋</div>
-      <div>
-        <div style="font-size:1.5rem;font-weight:900;line-height:1.2;" id="welcome-name">¡Hola!</div>
-        <div style="font-size:.85rem;opacity:.85;margin-top:.3rem;">Aquí están tus misiones y horario de hoy. ¡Selecciona una actividad para comenzar!</div>
-      </div>
-    </div>
-
-    <!-- View Switcher: only Día and Mes -->
-    <div class="d-flex justify-content-center gap-2 mb-4 fade-in-up delay-1">
-      <button class="btn schedule-tab active" id="st-day" onclick="switchScheduleView('day')">📅 Día</button>
-      <button class="btn schedule-tab" id="st-month" onclick="switchScheduleView('month')">📆 Mes</button>
-    </div>
-
-    <!-- 1. Day View -->
-    <div id="schedule-day-container" class="fade-in-up delay-2">
-      <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="welcome-wrap fade-in-up">
+      <div class="welcome-banner mb-0">
+        <div class="welcome-avatar" id="welcome-avatar">TL</div>
         <div>
-          <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-blue);">Horario Diario</div>
-          <h3 id="schedule-day-title" class="fw-black m-0" style="font-size:1.3rem;">Cargando…</h3>
-        </div>
-        <div class="d-flex gap-2">
-          <button onclick="changeDay(-1)" class="btn-day-nav" title="Día Anterior"><i class="fas fa-chevron-left"></i></button>
-          <button onclick="changeDay(1)" class="btn-day-nav" title="Día Siguiente"><i class="fas fa-chevron-right"></i></button>
-        </div>
-      </div>
-      <div id="schedule-next-task-highlight"></div>
-      <div id="schedule-day-list" class="d-flex flex-column gap-3"></div>
-    </div>
-
-    <!-- 2. Week View -->
-    <div id="schedule-week-container" style="display:none;" class="fade-in-up delay-2">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-blue);">Horario Semanal</div>
-          <h3 id="schedule-week-title" class="fw-black m-0" style="font-size:1.3rem;">Esta Semana</h3>
-        </div>
-      </div>
-      <div id="schedule-week-grid" class="week-grid"></div>
-    </div>
-
-    <!-- 3. Month View -->
-    <div id="schedule-month-container" style="display:none;" class="fade-in-up delay-2">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-blue);">Horario Mensual</div>
-          <h3 id="schedule-month-title" class="fw-black m-0" style="font-size:1.3rem;">Este Mes</h3>
-        </div>
-        <div class="d-flex gap-2">
-          <button onclick="changeMonth(-1)" class="btn" style="border-radius:12px;background:var(--np-card);border:1.5px solid var(--np-border);color:var(--np-text);"><i class="fas fa-chevron-left"></i></button>
-          <button onclick="changeMonth(1)" class="btn" style="border-radius:12px;background:var(--np-card);border:1.5px solid var(--np-border);color:var(--np-text);"><i class="fas fa-chevron-right"></i></button>
-        </div>
-      </div>
-      <div class="row g-4">
-        <div class="col-md-5">
-          <div id="schedule-month-calendar" class="month-calendar"></div>
-        </div>
-        <div class="col-md-7">
-          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);margin-bottom:.75rem;"><i class="fas fa-list me-1"></i>Misiones del día seleccionado</div>
-          <div id="schedule-month-list" class="d-flex flex-column gap-3"></div>
+          <div style="font-size:1.55rem;font-weight:900;line-height:1.2;" id="welcome-name">Hola</div>
+          <div style="font-size:.92rem;color:var(--np-text-muted);margin-top:.35rem;max-width:48ch;">Aqui estan tus actividades del dia. Elige una para comenzar y sigue los pasos uno por uno.</div>
         </div>
       </div>
     </div>
 
-    <!-- 4. Free/Ad-hoc Practice -->
-    <div id="schedule-free-container" style="display:none;" class="fade-in-up delay-2">
-      <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);margin-bottom:1rem;"><i class="fas fa-stairs me-1"></i>Práctica Libre de Actividades Activas</div>
-      <div class="d-flex flex-wrap gap-2 mb-4">
-        <button class="cat-pill active" id="cp-all" onclick="filterMissions('all')">⭐ Todas</button>
-        <button class="cat-pill" id="cp-vida" onclick="filterMissions('Vida Diaria')">🧼 Vida Diaria</button>
-        <button class="cat-pill" id="cp-escolar" onclick="filterMissions('Rutina Escolar')">🎒 Escolar</button>
-        <button class="cat-pill" id="cp-reg" onclick="filterMissions('Regulación Emocional')">🌬️ Regulación</button>
-        <button class="cat-pill" id="cp-social" onclick="filterMissions('Actividades Sociales')">🤝 Sociales</button>
-      </div>
-      <div id="mission-grid" class="row g-4"></div>
-    </div>
+    <div class="board-layout">
+      <div class="board-main">
 
+        <div id="schedule-day-container" class="fade-in-up delay-2 schedule-shell equal-panel">
+          <div class="schedule-view-switch">
+            <button class="btn schedule-tab active" id="st-day" onclick="switchScheduleView('day')">Dia</button>
+            <button class="btn schedule-tab" id="st-month" onclick="switchScheduleView('month')">Mes</button>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-blue);">Horario diario</div>
+              <h3 id="schedule-day-title" class="fw-black m-0" style="font-size:1.3rem;">Cargando...</h3>
+            </div>
+            <div class="d-flex gap-2">
+              <button onclick="changeDay(-1)" class="btn-day-nav" title="Dia anterior"><i class="fas fa-chevron-left"></i></button>
+              <button onclick="changeDay(1)" class="btn-day-nav" title="Dia siguiente"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div id="schedule-next-task-highlight"></div>
+          <div id="schedule-day-list" class="day-list-stack"></div>
+        </div>
+
+        <div id="schedule-month-container" style="display:none;" class="fade-in-up delay-2 schedule-shell">
+          <div class="schedule-view-switch">
+            <button class="btn schedule-tab" id="st-day-month" onclick="switchScheduleView('day')">Dia</button>
+            <button class="btn schedule-tab active" id="st-month-month" onclick="switchScheduleView('month')">Mes</button>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-blue);">Horario mensual</div>
+              <h3 id="schedule-month-title" class="fw-black m-0" style="font-size:1.3rem;">Este mes</h3>
+            </div>
+            <div class="d-flex gap-2">
+              <button onclick="changeMonth(-1)" class="btn" style="border-radius:12px;background:var(--np-card);border:1px solid var(--np-border);color:var(--np-text);box-shadow:var(--np-shadow);"><i class="fas fa-chevron-left"></i></button>
+              <button onclick="changeMonth(1)" class="btn" style="border-radius:12px;background:var(--np-card);border:1px solid var(--np-border);color:var(--np-text);box-shadow:var(--np-shadow);"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="row g-4">
+            <div class="col-md-5">
+              <div id="schedule-month-calendar" class="month-calendar"></div>
+            </div>
+            <div class="col-md-7">
+              <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);margin-bottom:.75rem;"><i class="fas fa-list me-1"></i>Actividades del dia seleccionado</div>
+              <div id="schedule-month-list" class="d-flex flex-column gap-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="board-side">
+        <div class="mobile-practice-toggle d-lg-none fade-in-up delay-1">
+          <button class="mobile-practice-btn" type="button" data-bs-toggle="collapse" data-bs-target="#free-skills-panel-mobile" aria-expanded="false" aria-controls="free-skills-panel-mobile">
+            <span>
+              <span style="display:block;font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-purple);">Habilidades disponibles</span>
+              <span style="display:block;font-size:.95rem;font-weight:900;color:var(--np-text);margin-top:.15rem;">Abrir practica libre</span>
+            </span>
+            <i class="fas fa-chevron-down toggle-chevron"></i>
+          </button>
+        </div>
+
+        <div id="free-skills-panel-mobile" class="collapse d-lg-block">
+          <div class="np-card free-skills-shell fade-in-up delay-1 equal-panel">
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+              <div>
+                <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-purple);">Habilidades disponibles</div>
+                <h3 class="m-0" style="font-size:1.25rem;font-weight:900;color:var(--np-text);">Selecciona una practica libre</h3>
+              </div>
+              <div class="free-skills-copy">
+                Acceso rapido a ayuda, calma y comunicacion.
+              </div>
+            </div>
+            <div id="free-skills-grid" class="free-skills-grid"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
 
-  <!-- Step-by-step view (hidden initially) -->
   <div id="step-view" style="display:none;">
-    <button class="btn mb-4 fw-bold" onclick="showBoard()" style="border-radius:12px;background:var(--np-card);border:1.5px solid var(--np-border);color:var(--np-text);font-size:.8rem;">
-      <i class="fas fa-arrow-left me-1"></i> Volver a Misiones
+    <button class="btn mb-4 fw-bold" onclick="showBoard()" style="border-radius:12px;background:var(--np-card);border:1px solid var(--np-border);color:var(--np-text);font-size:.8rem;box-shadow:var(--np-shadow);">
+      <i class="fas fa-arrow-left me-1"></i> Volver a actividades
     </button>
 
-    <!-- Step card -->
     <div class="step-card fade-in-up">
-      <!-- Progress dots -->
       <div class="progress-dots" id="step-dots"></div>
-
-      <!-- Pictogram -->
-      <div class="step-pictogram" id="step-icon">🌟</div>
-
-      <!-- Step info -->
+      <div class="step-pictogram" id="step-icon">⭐</div>
       <div style="margin-bottom:1.5rem;">
         <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);margin-bottom:.4rem;" id="step-num">Paso 1</div>
-        <h3 class="step-title" id="step-title">Cargando…</h3>
+        <h3 class="step-title" id="step-title">Cargando...</h3>
         <p class="step-desc" id="step-desc"></p>
       </div>
-
-      <!-- Controls -->
       <div class="d-flex align-items-center gap-3 justify-content-center">
         <button class="btn-speak-step" onclick="speakCurrent()" title="Escuchar">
           <i class="fas fa-volume-high"></i>
         </button>
         <button class="btn-big-action" onclick="nextStep()">
-          <i class="fas fa-circle-check me-2"></i> ¡Listo! Hecho
+          <i class="fas fa-circle-check me-2"></i> Listo
         </button>
       </div>
-      <button class="btn-back-step mt-3" onclick="prevStep()" id="btn-prev">← Paso anterior</button>
+      <button class="btn-back-step mt-3" onclick="prevStep()" id="btn-prev">Paso anterior</button>
     </div>
   </div>
 
-  <!-- Success view -->
   <div id="success-view" style="display:none;">
     <div class="success-card bounce-in">
       <div class="trophy-anim" style="font-size:5rem;margin-bottom:1.25rem;">🏆</div>
-      <h2 style="font-size:2rem;font-weight:900;margin-bottom:.75rem;" id="success-title">¡Excelente Trabajo!</h2>
-      <p style="font-size:1rem;opacity:.9;max-width:380px;line-height:1.6;margin-bottom:2rem;" id="success-msg">
-        Completaste todos los pasos. ¡Cada día eres más independiente!
-      </p>
+      <h2 style="font-size:2rem;font-weight:900;margin-bottom:.75rem;" id="success-title">Excelente trabajo</h2>
+      <p style="font-size:1rem;opacity:.9;max-width:380px;line-height:1.6;margin-bottom:2rem;" id="success-msg">Completaste todos los pasos.</p>
       <div class="d-flex gap-3 flex-wrap justify-content-center">
-        <button onclick="restartMission()" class="btn fw-bold" style="border-radius:16px;background:rgba(255,255,255,.25);color:#fff;border:2px solid rgba(255,255,255,.4);padding:.75rem 1.75rem;font-size:.9rem;">
+        <button onclick="restartMission()" class="btn fw-bold" style="border-radius:16px;background:rgba(255,255,255,.22);color:#fff;border:2px solid rgba(255,255,255,.36);padding:.75rem 1.75rem;font-size:.9rem;">
           <i class="fas fa-rotate-left me-2"></i> Hacerlo de nuevo
         </button>
         <button onclick="showBoard()" class="btn fw-bold" style="border-radius:16px;background:#fff;color:var(--np-purple);border:none;padding:.75rem 1.75rem;font-size:.9rem;box-shadow:0 4px 16px rgba(0,0,0,.15);">
-          <i class="fas fa-grid-2 me-2"></i> Ver Misiones
+          <i class="fas fa-list me-2"></i> Ver actividades
         </button>
       </div>
     </div>
   </div>
-
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="shared.js"></script>
 <script>
 let currentMissionKey = null;
-let currentStepIndex  = 0;
-let missionCategory   = 'all';
-
-let currentTaskId     = null;
-let currentTaskDate   = null;
+let currentStepIndex = 0;
+let currentTaskId = null;
+let currentTaskDate = null;
 let selectedScheduleDate = new Date().toISOString().slice(0,10);
-let scheduleViewMode  = 'day';
+let scheduleViewMode = 'day';
 
 document.addEventListener('DOMContentLoaded', () => {
   NP_initSystem();
@@ -563,39 +660,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const session = NP_getSession();
   if (!session) {
-    document.getElementById('session-badge').textContent = '⭐ Mi Planificador';
-    document.getElementById('welcome-name').textContent  = '¡Hola!';
+    document.getElementById('session-badge').textContent = 'Mi planificador';
+    document.getElementById('welcome-name').textContent = 'Hola';
     document.getElementById('welcome-avatar').textContent = '👋';
   } else {
     const profile = NP_getProfile();
     document.getElementById('session-badge').innerHTML = `<i class="fas fa-circle" style="font-size:.4rem;margin-right:.35rem;"></i> ${profile.name}`;
-    document.getElementById('welcome-name').textContent = `¡Hola, ${profile.name.split(' ')[0]}!`;
-    const initials = profile.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('welcome-name').textContent = `Hola, ${profile.name.split(' ')[0]}`;
+    const initials = profile.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
     document.getElementById('welcome-avatar').textContent = initials;
   }
 
-  // Load default schedule view
+  renderFreeSkills();
   switchScheduleView('day');
-  renderMissionGrid();
 });
 
-// ── SCHEDULE VIEW NAVIGATION ────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  if (scheduleViewMode === 'day') syncScheduleDayScroll();
+});
+
 function switchScheduleView(mode) {
   scheduleViewMode = mode;
-  
-  // Update switcher styling (only day and month tabs exist now)
-  ['day', 'month'].forEach(m => {
-    const el = document.getElementById(`st-${m}`);
-    if (el) el.classList.toggle('active', m === mode);
+  const tabGroups = {
+    day: ['st-day', 'st-day-month'],
+    month: ['st-month', 'st-month-month']
+  };
+  Object.entries(tabGroups).forEach(([key, ids]) => {
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('active', key === mode);
+    });
   });
 
-  // Toggle containers
-  document.getElementById('schedule-day-container').style.display   = mode === 'day'   ? 'block' : 'none';
-  document.getElementById('schedule-week-container').style.display  = mode === 'week'  ? 'block' : 'none';
+  document.getElementById('schedule-day-container').style.display = mode === 'day' ? 'block' : 'none';
   document.getElementById('schedule-month-container').style.display = mode === 'month' ? 'block' : 'none';
-  document.getElementById('schedule-free-container').style.display  = mode === 'free'  ? 'block' : 'none';
 
-  // Render view
   if (mode === 'day') {
     renderScheduleDay();
   } else if (mode === 'month') {
@@ -603,15 +702,10 @@ function switchScheduleView(mode) {
   }
 }
 
-// ── DAY VIEW ────────────────────────────────────────────────────────────────
 function changeDay(offset) {
-  if (offset === 0) {
-    selectedScheduleDate = new Date().toISOString().slice(0,10);
-  } else {
-    const d = new Date(selectedScheduleDate + 'T12:00:00');
-    d.setDate(d.getDate() + offset);
-    selectedScheduleDate = d.toISOString().slice(0,10);
-  }
+  const d = new Date(selectedScheduleDate + 'T12:00:00');
+  d.setDate(d.getDate() + offset);
+  selectedScheduleDate = d.toISOString().slice(0,10);
   renderScheduleDay();
 }
 
@@ -619,8 +713,6 @@ function renderScheduleDay() {
   const container = document.getElementById('schedule-day-list');
   const highlightContainer = document.getElementById('schedule-next-task-highlight');
   const dateObj = new Date(selectedScheduleDate + 'T12:00:00');
-  
-  // Update title
   document.getElementById('schedule-day-title').textContent = dateObj.toLocaleDateString('es-MX', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
   });
@@ -634,101 +726,154 @@ function renderScheduleDay() {
     container.innerHTML = `
       <div class="text-center py-5" style="color:var(--np-text-muted);">
         <div style="font-size:3rem;margin-bottom:1rem;">🛌</div>
-        <h4 class="fw-bold">No hay tareas programadas para este día</h4>
-        <p style="font-size:.85rem;">¡Disfruta de tu tiempo libre o practica en la pestaña "Libre"!</p>
+        <h4 class="fw-bold">No hay tareas programadas para este dia</h4>
+        <p style="font-size:.85rem;">Puedes descansar o revisar otra fecha.</p>
       </div>`;
+    syncScheduleDayScroll();
     return;
   }
 
   const now = new Date();
   const todayStr = now.toISOString().slice(0,10);
   const isToday = selectedScheduleDate === todayStr;
-
-  // Find next pending task for highlight (the first task chronologically that is not done)
-  let nextTask = null;
-  if (isToday) {
-    nextTask = tasks.find(t => {
-      const execs = NP_getExecutionsForTaskDate(t.id, selectedScheduleDate);
-      return execs.length === 0;
-    });
-  }
+  const nextTask = isToday ? tasks.find(t => NP_getExecutionsForTaskDate(t.id, selectedScheduleDate).length === 0) : null;
 
   if (nextTask) {
     const r = routines[nextTask.skillKey];
     if (r) {
+      const nextTaskColor = nextTask.color || 'var(--np-blue)';
       const [th, tm] = nextTask.time.split(':').map(Number);
       const taskDT = new Date(selectedScheduleDate + `T${String(th).padStart(2,'0')}:${String(tm).padStart(2,'0')}:00`);
       const diff = Math.round((taskDT - now) / 60000);
-      let timeText = '';
-      if (diff > 0) {
-        timeText = `en ${diff < 60 ? diff + ' min' : Math.round(diff/60) + ' horas'}`;
-      } else {
-        timeText = `hace ${Math.abs(diff) < 60 ? Math.abs(diff) + ' min' : Math.round(Math.abs(diff)/60) + ' horas'} (pendiente)`;
-      }
+      const timeText = diff > 0
+        ? `en ${diff < 60 ? diff + ' min' : Math.round(diff / 60) + ' horas'}`
+        : `hace ${Math.abs(diff) < 60 ? Math.abs(diff) + ' min' : Math.round(Math.abs(diff) / 60) + ' horas'} (pendiente)`;
 
       highlightContainer.innerHTML = `
-        <div class="p-4 mb-4 fade-in-up" style="background:linear-gradient(135deg, rgba(59,130,246,.08), rgba(168,85,247,.08)); border: 3px dashed var(--np-blue); border-radius: 28px; box-shadow: 0 4px 20px rgba(59,130,246,.08);">
-          <div style="font-size:.78rem; font-weight:800; text-transform:uppercase; color:var(--np-blue); margin-bottom:.75rem;">
-            <i class="fas fa-arrow-right-long me-1"></i> Siguiente misión a cumplir:
+        <div class="next-task-card p-4 mb-4 fade-in-up">
+          <div style="font-size:.78rem;font-weight:800;text-transform:uppercase;color:var(--np-blue);margin-bottom:.75rem;">
+            <i class="fas fa-arrow-right-long me-1"></i> Siguiente actividad
           </div>
-          <div class="d-flex align-items-center gap-3 flex-wrap">
-            <div class="stc-icon-wrap" style="background:linear-gradient(135deg, ${nextTask.color || 'var(--np-blue)'}, ${nextTask.color}cc);">${r.icon}</div>
+          <div class="next-task-layout">
+            <div class="stc-icon-wrap" style="background:linear-gradient(135deg, ${nextTaskColor}, ${nextTaskColor});">${r.icon}</div>
             <div class="flex-grow-1 min-width-0">
-              <h4 class="fw-black m-0" style="font-size:1.2rem; color:var(--np-text); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${nextTask.label}</h4>
-              <div style="font-size:.8rem; color:var(--np-text-muted); font-weight:600; margin-top:.2rem;">
+              <h4 class="fw-black m-0" style="font-size:1.15rem;color:var(--np-text);text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">${nextTask.label}</h4>
+              <div style="font-size:.8rem;color:var(--np-text-muted);font-weight:600;margin-top:.25rem;line-height:1.45;">
                 Hora: ${NP_formatTime(nextTask.time)} · <strong class="text-primary">${timeText}</strong>
               </div>
             </div>
-            <button class="btn btn-primary btn-lg fw-bold flex-shrink-0" onclick="startScheduledMission('${nextTask.skillKey}', '${nextTask.id}', '${selectedScheduleDate}')" style="border-radius:16px; font-size:.9rem; padding:.8rem 1.6rem; box-shadow: 0 4px 15px rgba(59,130,246,.3);">
-              <i class="fas fa-play me-2"></i>¡Comenzar ahora!
-            </button>
+            <div class="next-task-action">
+              <button class="btn btn-primary btn-lg fw-bold" onclick="startScheduledMission('${nextTask.skillKey}', '${nextTask.id}', '${selectedScheduleDate}')" style="border-radius:16px;font-size:.88rem;padding:.78rem 1.2rem;box-shadow:0 10px 18px rgba(59,130,246,.22);">
+                <i class="fas fa-play me-2"></i>Comenzar
+              </button>
+            </div>
           </div>
-        </div>
-      `;
+        </div>`;
     }
   }
 
   tasks.forEach(t => {
     const r = routines[t.skillKey];
     if (!r) return;
-
+    const taskColor = t.color || 'var(--np-blue)';
     const execs = NP_getExecutionsForTaskDate(t.id, selectedScheduleDate);
     const isDone = execs.length > 0;
-    
-    // Time label & calculations
     const [th, tm] = t.time.split(':').map(Number);
     const taskDT = new Date(selectedScheduleDate + `T${String(th).padStart(2,'0')}:${String(tm).padStart(2,'0')}:00`);
-    const isPast = selectedScheduleDate === todayStr && now > taskDT;
-
     let relText = '';
     if (selectedScheduleDate === todayStr && !isDone) {
       const diff = Math.round((taskDT - now) / 60000);
-      if (diff > 0) {
-        relText = `en ${diff < 60 ? diff + ' min' : Math.round(diff/60) + ' horas'}`;
-      } else {
-        relText = `hace ${Math.abs(diff) < 60 ? Math.abs(diff) + ' min' : Math.round(Math.abs(diff)/60) + ' horas'}`;
-      }
+      relText = diff > 0
+        ? `en ${diff < 60 ? diff + ' min' : Math.round(diff/60) + ' horas'}`
+        : `hace ${Math.abs(diff) < 60 ? Math.abs(diff) + ' min' : Math.round(Math.abs(diff)/60) + ' horas'}`;
     }
 
     const card = document.createElement('div');
     card.className = `schedule-task-card ${isDone ? 'completed' : ''}`;
     card.innerHTML = `
-      <div class="stc-indicator" style="background:${t.color || 'var(--np-blue)'};"></div>
-      <div class="stc-icon-wrap" style="background:linear-gradient(135deg, ${t.color || 'var(--np-blue)'}, ${t.color}cc);">${r.icon}</div>
+      <div class="stc-indicator" style="background:${taskColor};"></div>
+      <div class="stc-icon-wrap" style="background:linear-gradient(135deg, ${taskColor}, ${taskColor});">${r.icon}</div>
       <div class="stc-info">
-        <div class="stc-time"><i class="far fa-clock me-1"></i>${NP_formatTime(t.time)} ${relText ? `· <span class="text-warning">${relText}</span>` : ''}</div>
+        <div class="stc-time"><i class="far fa-clock me-1"></i>${NP_formatTime(t.time)} ${relText ? `· <span class="text-primary">${relText}</span>` : ''}</div>
         <div class="stc-title" style="color:var(--np-text);">${t.label}</div>
         <div class="stc-meta">${r.name} · ${r.steps.length} pasos</div>
       </div>
-      <div>
-        ${isDone 
-          ? `<div class="d-flex flex-column align-items-end gap-1">
-               <span class="badge bg-success py-2 px-3 rounded-pill fw-bold text-white"><i class="fas fa-check-circle me-1"></i>Hecho</span>
-             </div>`
-          : `<button class="btn btn-primary stc-status-btn" onclick="startScheduledMission('${t.skillKey}', '${t.id}', '${selectedScheduleDate}')">
-               <i class="fas fa-play me-2"></i>Comenzar
-             </button>`
+      <div class="stc-action">
+        ${isDone
+          ? `<div class="d-flex flex-column align-items-end gap-1"><span class="badge bg-success py-2 px-3 rounded-pill fw-bold text-white"><i class="fas fa-check-circle me-1"></i>Hecho</span></div>`
+          : `<button class="btn btn-primary stc-status-btn" onclick="startScheduledMission('${t.skillKey}', '${t.id}', '${selectedScheduleDate}')"><i class="fas fa-play me-2"></i>Comenzar</button>`
         }
+      </div>`;
+    container.appendChild(card);
+  });
+  syncScheduleDayScroll();
+}
+
+function syncScheduleDayScroll() {
+  const dayContainer = document.getElementById('schedule-day-container');
+  const list = document.getElementById('schedule-day-list');
+  if (!dayContainer || !list) return;
+
+  if (window.innerWidth <= 991) {
+    list.style.maxHeight = 'none';
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    const styles = getComputedStyle(dayContainer);
+    const padBottom = parseFloat(styles.paddingBottom) || 0;
+    const available = dayContainer.clientHeight - list.offsetTop - padBottom;
+    list.style.maxHeight = `${Math.max(available, 180)}px`;
+  });
+}
+
+function renderFreeSkills() {
+  const container = document.getElementById('free-skills-grid');
+  if (!container) return;
+
+  const routines = NP_getRoutines();
+  const active = NP_getActive();
+  const accentPalette = ['var(--np-purple)', 'var(--np-blue)', 'var(--np-pink)', 'var(--np-green)', 'var(--np-orange)', 'var(--np-purple)'];
+  const preferredKeys = [
+    'expresar_enojo',
+    'pedir_por_favor',
+    'pausa_sensorial',
+    'respirar_calmarme',
+    'espacio_tranquilo',
+    'saludar_llegar'
+  ];
+
+  const items = preferredKeys
+    .map(key => ({ key, routine: routines[key] }))
+    .filter(({ key, routine }) => routine && active[key] !== false);
+
+  container.innerHTML = '';
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="text-center py-4" style="color:var(--np-text-muted);grid-column:1 / -1;">
+        <i class="far fa-face-smile mb-2 d-block" style="font-size:1.6rem;"></i>
+        No hay habilidades libres activas en este momento.
+      </div>`;
+    return;
+  }
+
+  items.forEach(({ key, routine }, index) => {
+    const accentColor = accentPalette[index % accentPalette.length];
+    const card = document.createElement('div');
+    card.className = 'free-skill-card';
+    card.innerHTML = `
+      <div class="free-skill-icon" style="background:linear-gradient(135deg, ${accentColor}, ${accentColor});">${routine.icon}</div>
+      <div class="free-skill-info">
+        <h4 class="free-skill-title">${routine.name}</h4>
+        <span class="free-skill-tag">${routine.category}</span>
+        <p class="free-skill-desc">${routine.description || 'Practica esta habilidad cuando la necesites.'}</p>
+      </div>
+      <div class="free-skill-meta">
+        <div class="free-skill-steps"><i class="fas fa-list-check me-1"></i>${routine.steps.length} pasos guiados</div>
+        <button class="btn btn-primary fw-bold" onclick="startFreeMission('${key}')" style="border-radius:12px;padding:.7rem .95rem;min-width:132px;">
+          <i class="fas fa-play me-1"></i> Comenzar
+        </button>
       </div>`;
     container.appendChild(card);
   });
@@ -740,72 +885,12 @@ function startScheduledMission(skillKey, taskId, date) {
   startMission(skillKey);
 }
 
-// ── WEEK VIEW ────────────────────────────────────────────────────────────────
-function renderScheduleWeek() {
-  const container = document.getElementById('schedule-week-grid');
-  
-  // Find Monday of the current selectedScheduleDate week
-  const curr = new Date(selectedScheduleDate + 'T12:00:00');
-  const day = curr.getDay(); // 0 = Sunday, 1 = Monday ...
-  const distanceToMonday = day === 0 ? -6 : 1 - day; // how many days to get back to Monday
-  const monday = new Date(curr);
-  monday.setDate(curr.getDate() + distanceToMonday);
-
-  // Update title
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  document.getElementById('schedule-week-title').textContent = `Semana del ${monday.getDate()} de ${monday.toLocaleString('es-MX', {month:'short'})} al ${sunday.getDate()} de ${sunday.toLocaleString('es-MX', {month:'short'})}`;
-
-  container.innerHTML = '';
-  const todayStr = new Date().toISOString().slice(0,10);
-
-  for (let i = 0; i < 7; i++) {
-    const loopDate = new Date(monday);
-    loopDate.setDate(monday.getDate() + i);
-    const loopDateStr = loopDate.toISOString().slice(0,10);
-    const loopDayOfWeek = loopDate.getDay();
-
-    const isToday = loopDateStr === todayStr;
-    const dayName = loopDate.toLocaleDateString('es-MX', { weekday: 'short' });
-    const dayNum  = loopDate.getDate();
-
-    const tasks = NP_getTasksForDate(loopDateStr);
-    const col = document.createElement('div');
-    col.className = `week-day-col ${isToday ? 'today' : ''}`;
-    
-    let tasksHtml = '';
-    if (tasks.length === 0) {
-      tasksHtml = `<div class="text-muted text-center small my-auto py-2">Sin tareas</div>`;
-    } else {
-      tasksHtml = tasks.map(t => {
-        const r = NP_getRoutines()[t.skillKey];
-        if (!r) return '';
-        const execs = NP_getExecutionsForTaskDate(t.id, loopDateStr);
-        const isDone = execs.length > 0;
-        return `
-          <div class="wd-task-pill ${isDone ? 'completed shadow-none opacity-75' : ''}" ${isDone ? 'onclick="event.stopPropagation();"' : `onclick="startScheduledMission('${t.skillKey}', '${t.id}', '${loopDateStr}')"`} title="${t.label} a las ${NP_formatTime(t.time)}">
-            <div class="d-flex align-items-center gap-2 min-w-0 flex-grow-1">
-              <span class="fs-6 flex-shrink-0">${r.icon}</span>
-              <span class="text-truncate">${t.label}</span>
-            </div>
-            <span class="small opacity-75 flex-shrink-0 ms-1">${t.time}</span>
-          </div>`;
-      }).join('');
-    }
-
-    col.innerHTML = `
-      <div class="wd-header" style="${isToday ? 'color:var(--np-blue);' : 'color:var(--np-text-muted);'}">
-        <span>${dayName}</span>
-        <span class="fw-black">${dayNum}</span>
-      </div>
-      <div class="d-flex flex-column gap-2 flex-grow-1">
-        ${tasksHtml}
-      </div>`;
-    container.appendChild(col);
-  }
+function startFreeMission(skillKey) {
+  currentTaskId = null;
+  currentTaskDate = null;
+  startMission(skillKey);
 }
 
-// ── MONTH VIEW ───────────────────────────────────────────────────────────────
 function changeMonth(offset) {
   const d = new Date(selectedScheduleDate + 'T12:00:00');
   d.setMonth(d.getMonth() + offset);
@@ -819,12 +904,9 @@ function renderScheduleMonth() {
   const curr = new Date(selectedScheduleDate + 'T12:00:00');
   const year = curr.getFullYear();
   const month = curr.getMonth();
+  document.getElementById('schedule-month-title').textContent = curr.toLocaleDateString('es-MX', { month:'long', year:'numeric' }).toUpperCase();
 
-  // Set title
-  document.getElementById('schedule-month-title').textContent = curr.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }).toUpperCase();
-
-  // Draw calendar
-  const firstDayIndex = new Date(year, month, 1).getDay(); // 0=Sunday
+  const firstDayIndex = new Date(year, month, 1).getDay();
   const totalDays = new Date(year, month + 1, 0).getDate();
   const prevMonthTotalDays = new Date(year, month, 0).getDate();
 
@@ -837,33 +919,26 @@ function renderScheduleMonth() {
       <div class="mc-header-day">Ju</div>
       <div class="mc-header-day">Vi</div>
       <div class="mc-header-day">Sa</div>
-    </div>
-  `;
+    </div>`;
   const grid = container.querySelector('.mc-grid');
-  
   const todayStr = new Date().toISOString().slice(0,10);
 
-  // Fill in days of the previous month
   const offsetIndex = firstDayIndex === 0 ? 0 : firstDayIndex;
   for (let i = offsetIndex; i > 0; i--) {
-    const dayVal = prevMonthTotalDays - i + 1;
     const div = document.createElement('div');
     div.className = 'mc-day outside';
-    div.textContent = dayVal;
+    div.textContent = prevMonthTotalDays - i + 1;
     grid.appendChild(div);
   }
 
-  // Days of current month
   for (let i = 1; i <= totalDays; i++) {
     const loopDateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
     const isToday = loopDateStr === todayStr;
     const isSelected = loopDateStr === selectedScheduleDate;
-
     const div = document.createElement('div');
     div.className = `mc-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`;
     div.innerHTML = `<span>${i}</span>`;
-    
-    // Check if loopDateStr has tasks
+
     const tasks = NP_getTasksForDate(loopDateStr);
     if (tasks.length > 0) {
       const dotsDiv = document.createElement('div');
@@ -881,11 +956,9 @@ function renderScheduleMonth() {
       selectedScheduleDate = loopDateStr;
       renderScheduleMonth();
     };
-
     grid.appendChild(div);
   }
 
-  // Render tasks for the selected date
   const selectedTasks = NP_getTasksForDate(selectedScheduleDate);
   const routines = NP_getRoutines();
   listContainer.innerHTML = '';
@@ -894,7 +967,7 @@ function renderScheduleMonth() {
     listContainer.innerHTML = `
       <div class="text-center py-4 text-muted">
         <i class="far fa-calendar-times mb-2 d-block" style="font-size:1.5rem;"></i>
-        No hay tareas para el día seleccionado
+        No hay tareas para el dia seleccionado
       </div>`;
     return;
   }
@@ -902,118 +975,53 @@ function renderScheduleMonth() {
   selectedTasks.forEach(t => {
     const r = routines[t.skillKey];
     if (!r) return;
+    const taskColor = t.color || 'var(--np-blue)';
     const execs = NP_getExecutionsForTaskDate(t.id, selectedScheduleDate);
     const isDone = execs.length > 0;
 
     const card = document.createElement('div');
     card.className = `schedule-task-card ${isDone ? 'completed' : ''}`;
-    card.style.padding = '.75rem 1.25rem';
+    card.style.padding = '.85rem 1rem .85rem 1.15rem';
     card.style.gap = '.75rem';
     card.innerHTML = `
-      <div class="stc-indicator" style="background:${t.color || 'var(--np-blue)'};"></div>
-      <div class="stc-icon-wrap" style="width:40px;height:40px;font-size:1.25rem;background:linear-gradient(135deg, ${t.color || 'var(--np-blue)'}, ${t.color}cc);">${r.icon}</div>
+      <div class="stc-indicator" style="background:${taskColor};"></div>
+      <div class="stc-icon-wrap" style="width:42px;height:42px;font-size:1.2rem;background:linear-gradient(135deg, ${taskColor}, ${taskColor});">${r.icon}</div>
       <div class="stc-info">
         <div class="stc-time">${NP_formatTime(t.time)}</div>
         <div class="stc-title" style="font-size:1rem;color:var(--np-text);">${t.label}</div>
       </div>
       <div>
-        ${isDone 
+        ${isDone
           ? `<span class="badge bg-success py-1 px-2 rounded-pill fw-bold text-white" style="font-size:.65rem;"><i class="fas fa-check me-1"></i>Hecho</span>`
-          : `<button class="btn btn-sm btn-primary py-1 px-3 fw-bold" onclick="startScheduledMission('${t.skillKey}', '${t.id}', '${selectedScheduleDate}')" style="border-radius:10px; font-size:.72rem;">
-               Comenzar
-             </button>`
+          : `<button class="btn btn-sm btn-primary py-1 px-3 fw-bold" onclick="startScheduledMission('${t.skillKey}', '${t.id}', '${selectedScheduleDate}')" style="border-radius:10px;font-size:.72rem;">Comenzar</button>`
         }
       </div>`;
     listContainer.appendChild(card);
   });
 }
 
-// ── ORIGINAL MISSIONS FILTERING ──────────────────────────────────────────────
-function filterMissions(cat) {
-  missionCategory = cat;
-  ['all','vida','escolar','reg','social'].forEach(id=>{
-    document.getElementById('cp-'+id)?.classList.remove('active');
-  });
-  const map={all:'cp-all','Vida Diaria':'cp-vida','Rutina Escolar':'cp-escolar','Regulación Emocional':'cp-reg','Actividades Sociales':'cp-social'};
-  document.getElementById(map[cat])?.classList.add('active');
-  renderMissionGrid();
-}
-
-function renderMissionGrid() {
-  const grid    = document.getElementById('mission-grid');
-  const routines= NP_getRoutines();
-  const active  = NP_getActive();
-  grid.innerHTML= '';
-  let count = 0;
-
-  Object.keys(routines).forEach(key => {
-    const r = routines[key];
-    if (!active[key]) return;
-    if (missionCategory!=='all' && r.category!==missionCategory) return;
-    count++;
-
-    const gradColors = {
-      'Vida Diaria':      'linear-gradient(135deg,#f43f5e,#ec4899)',
-      'Rutina Escolar':   'linear-gradient(135deg,#3b82f6,#6366f1)',
-      'Regulación Emocional':'linear-gradient(135deg,#a855f7,#8b5cf6)',
-      'Actividades Sociales':'linear-gradient(135deg,#10b981,#059669)',
-    };
-    const grad = gradColors[r.category] || 'linear-gradient(135deg,#3b82f6,#a855f7)';
-
-    const col = document.createElement('div');
-    col.className = 'col-6 col-md-4';
-    col.innerHTML = `
-      <div class="mission-card" onclick="startScheduledMission('${key}', null, null)">
-        <button class="mc-speak" onclick="event.stopPropagation();NP_speakText('Vamos a practicar: ${r.name}')" title="Escuchar nombre">
-          <i class="fas fa-volume-high" style="font-size:.8rem;"></i>
-        </button>
-        <div class="mc-icon" style="background:${grad};">${r.icon}</div>
-        <div class="mc-title">${r.name}</div>
-        <div class="mc-cat">${r.category}</div>
-        <div class="mc-steps"><i class="fas fa-stairs me-1"></i>${r.steps.length} pasos</div>
-      </div>`;
-    grid.appendChild(col);
-  });
-
-  if (!count) {
-    grid.innerHTML = `
-      <div class="col-12">
-        <div class="empty-missions">
-          <div style="font-size:3rem;margin-bottom:1rem;">🌟</div>
-          <h4 class="fw-bold">No hay misiones asignadas</h4>
-          <p style="font-size:.85rem;">El cuidador debe activar actividades desde el <a href="actividades.html" style="color:var(--np-blue);">módulo de Actividades</a>.</p>
-        </div>
-      </div>`;
-  }
-}
-
 function startMission(key) {
-  currentMissionKey  = key;
-  currentStepIndex   = 0;
-  document.getElementById('board-view').style.display   = 'none';
+  currentMissionKey = key;
+  currentStepIndex = 0;
+  document.getElementById('board-view').style.display = 'none';
   document.getElementById('success-view').style.display = 'none';
-  document.getElementById('step-view').style.display    = 'block';
+  document.getElementById('step-view').style.display = 'block';
   document.getElementById('step-view').classList.add('fade-in-up');
   renderStep();
   NP_speakText(NP_getRoutines()[key].steps[0].text + '. ' + NP_getRoutines()[key].steps[0].description);
 }
 
 function renderStep() {
-  const r    = NP_getRoutines()[currentMissionKey];
+  const r = NP_getRoutines()[currentMissionKey];
   const step = r.steps[currentStepIndex];
-
-  // Dots
   const dotsEl = document.getElementById('step-dots');
-  dotsEl.innerHTML = r.steps.map((s,i) =>
-    `<div class="pdot ${i<currentStepIndex?'done':i===currentStepIndex?'active':''}"></div>`
-  ).join('');
+  dotsEl.innerHTML = r.steps.map((s,i) => `<div class="pdot ${i<currentStepIndex ? 'done' : i===currentStepIndex ? 'active' : ''}"></div>`).join('');
 
-  // Content
-  document.getElementById('step-icon').textContent  = step.icon || '🌟';
-  document.getElementById('step-num').textContent   = `Paso ${currentStepIndex+1} de ${r.steps.length}`;
+  document.getElementById('step-icon').textContent = step.icon || '⭐';
+  document.getElementById('step-num').textContent = `Paso ${currentStepIndex+1} de ${r.steps.length}`;
   document.getElementById('step-title').textContent = step.text;
-  document.getElementById('step-desc').textContent  = step.description;
-  document.getElementById('btn-prev').style.visibility = currentStepIndex===0?'hidden':'visible';
+  document.getElementById('step-desc').textContent = step.description;
+  document.getElementById('btn-prev').style.visibility = currentStepIndex===0 ? 'hidden' : 'visible';
 }
 
 function nextStep() {
@@ -1035,26 +1043,24 @@ function prevStep() {
 }
 
 function speakCurrent() {
-  const r    = NP_getRoutines()[currentMissionKey];
+  const r = NP_getRoutines()[currentMissionKey];
   const step = r.steps[currentStepIndex];
   NP_speakText(step.text + '. ' + step.description);
 }
 
 function showSuccess() {
-  const r    = NP_getRoutines()[currentMissionKey];
+  const r = NP_getRoutines()[currentMissionKey];
   const profile = NP_getProfile();
-  document.getElementById('success-title').textContent = `¡Excelente, ${profile.name.split(' ')[0]}!`;
-  document.getElementById('success-msg').textContent   = `Completaste todos los pasos de "${r.name}". ¡Cada día eres más independiente!`;
+  document.getElementById('success-title').textContent = `Excelente, ${profile.name.split(' ')[0]}`;
+  document.getElementById('success-msg').textContent = `Completaste todos los pasos de "${r.name}".`;
 
-  document.getElementById('step-view').style.display    = 'none';
+  document.getElementById('step-view').style.display = 'none';
   document.getElementById('success-view').style.display = 'block';
+  NP_speakText(`Felicidades. Completaste ${r.name}.`);
 
-  NP_speakText(`¡Felicidades! Completaste ${r.name}. ¡Eres increíble!`);
-
-  // Record student execution to database
-  const timeStr = new Date().toLocaleTimeString('es-MX', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  const timeStr = new Date().toLocaleTimeString('es-MX', { hour12:false, hour:'2-digit', minute:'2-digit' });
   const exec = {
-    taskId: currentTaskId, // Link to task if started from schedule
+    taskId: currentTaskId,
     skillKey: currentMissionKey,
     date: currentTaskDate || new Date().toISOString().slice(0,10),
     time: timeStr,
@@ -1064,7 +1070,7 @@ function showSuccess() {
       stepId: s.id,
       text: s.text,
       icon: s.icon,
-      level: 1, // Independiente
+      level: 1,
       value: 1.00,
       label: 'Independiente'
     })),
@@ -1073,7 +1079,6 @@ function showSuccess() {
     obtained: r.steps.length
   };
   NP_addExecution(exec);
-
   launchConfetti();
 }
 
@@ -1083,37 +1088,24 @@ function restartMission() {
 
 function showBoard() {
   currentMissionKey = null;
-  currentStepIndex  = 0;
-  document.getElementById('step-view').style.display    = 'none';
+  currentStepIndex = 0;
+  document.getElementById('step-view').style.display = 'none';
   document.getElementById('success-view').style.display = 'none';
-  document.getElementById('board-view').style.display   = 'block';
+  document.getElementById('board-view').style.display = 'block';
   window.speechSynthesis && window.speechSynthesis.cancel();
-  
-  // Refresh schedule state
+  renderFreeSkills();
+
   if (scheduleViewMode === 'day') {
     renderScheduleDay();
-  } else if (scheduleViewMode === 'week') {
-    renderScheduleWeek();
-  } else if (scheduleViewMode === 'month') {
-    renderScheduleMonth();
   } else {
-    renderMissionGrid();
+    renderScheduleMonth();
   }
 }
 
 function launchConfetti() {
   const colors = ['#f43f5e','#3b82f6','#a855f7','#10b981','#f97316','#fbbf24'];
   const container = document.createElement('div');
-  container.style.cssText = `
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px;
-    height: 10px;
-    z-index: 9999;
-    pointer-events: none;
-  `;
+  container.style.cssText = `position:fixed;left:50%;top:50%;transform:translate(-50%, -50%);width:10px;height:10px;z-index:9999;pointer-events:none;`;
   document.body.appendChild(container);
 
   for (let i = 0; i < 80; i++) {
@@ -1125,14 +1117,14 @@ function launchConfetti() {
     const duration = 1 + Math.random() * 1.5;
 
     el.style.cssText = `
-      position: absolute;
-      width: ${8 + Math.random() * 10}px;
-      height: ${8 + Math.random() * 10}px;
-      background: ${colors[Math.floor(Math.random()*colors.length)]};
-      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
-      transform: translate(0, 0) scale(1);
-      opacity: 1;
-      transition: transform ${duration}s cubic-bezier(0.1, 0.8, 0.3, 1), opacity ${duration}s ease-out;
+      position:absolute;
+      width:${8 + Math.random() * 10}px;
+      height:${8 + Math.random() * 10}px;
+      background:${colors[Math.floor(Math.random() * colors.length)]};
+      border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+      transform:translate(0, 0) scale(1);
+      opacity:1;
+      transition:transform ${duration}s cubic-bezier(0.1, 0.8, 0.3, 1), opacity ${duration}s ease-out;
     `;
     container.appendChild(el);
 

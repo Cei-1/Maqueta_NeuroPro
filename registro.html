@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="manifest" href="manifest.json" />
+  <title>NeuroPro 2026 - Registro</title>
+  <meta name="description" content="Registro de cuenta administradora para la demo de NeuroPro." />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --np-pink:#f43f5e;
+      --np-pink-hover:#e11d48;
+      --np-pink-soft:#fff1f2;
+      --np-blue:#3b82f6;
+      --np-blue-soft:#eff6ff;
+      --np-purple:#a855f7;
+      --np-green:#10b981;
+      --np-orange:#f97316;
+      --np-bg:#f8fafc;
+      --np-card:#ffffff;
+      --np-sidebar:#ffffff;
+      --np-border:#e2e8f0;
+      --np-text:#0f172a;
+      --np-text-muted:#64748b;
+      --np-shadow:0 4px 24px rgba(0,0,0,.07);
+    }
+    [data-bs-theme="dark"] {
+      --np-bg:#090d16;
+      --np-card:#111827;
+      --np-sidebar:#0b111e;
+      --np-border:#1e293b;
+      --np-text:#f1f5f9;
+      --np-text-muted:#94a3b8;
+      --np-shadow:0 4px 24px rgba(0,0,0,.4);
+    }
+    * { box-sizing:border-box; }
+    body {
+      font-family:'Inter',sans-serif;
+      background:var(--np-bg);
+      color:var(--np-text);
+      min-height:100vh;
+      transition:background .3s,color .3s;
+      overflow-x:hidden;
+    }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:10px; }
+    [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background:#1f2937; }
+
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(18px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    @keyframes float {
+      0%,100% { transform:translateY(0); }
+      50% { transform:translateY(-8px); }
+    }
+
+    .np-card {
+      background:var(--np-card);
+      border:1px solid var(--np-border);
+      border-radius:24px;
+      box-shadow:var(--np-shadow);
+    }
+    .np-label {
+      font-size:.72rem;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--np-text-muted);
+      margin-bottom:.45rem;
+      display:block;
+    }
+    .np-input,
+    .np-select {
+      width:100%;
+      background:var(--np-bg);
+      border:1.5px solid var(--np-border);
+      border-radius:14px;
+      padding:.8rem 1rem;
+      font-size:.92rem;
+      color:var(--np-text);
+      transition:border-color .2s, box-shadow .2s, background .2s;
+    }
+    .np-input:focus,
+    .np-select:focus {
+      outline:none;
+      border-color:var(--np-pink);
+      box-shadow:0 0 0 3px rgba(244,63,94,.12);
+    }
+    .btn-np-save {
+      background:linear-gradient(135deg,var(--np-pink),var(--np-purple));
+      color:#fff;
+      border:none;
+      border-radius:16px;
+      padding:.9rem 1.4rem;
+      font-weight:800;
+      font-size:.95rem;
+      box-shadow:0 6px 18px rgba(244,63,94,.25);
+      transition:transform .2s, box-shadow .2s;
+    }
+    .btn-np-save:hover {
+      color:#fff;
+      transform:translateY(-1px);
+      box-shadow:0 10px 24px rgba(244,63,94,.32);
+    }
+    .btn-theme {
+      background:var(--np-card);
+      border:1px solid var(--np-border);
+      border-radius:12px;
+      width:40px;
+      height:40px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--np-text-muted);
+    }
+    .np-header-img { max-height:70px; object-fit:contain; }
+    .np-brand {
+      font-weight:900;
+      letter-spacing:.08em;
+      background:linear-gradient(135deg,var(--np-pink),var(--np-purple),var(--np-blue));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .orb {
+      position:absolute;
+      border-radius:50%;
+      filter:blur(60px);
+      opacity:.32;
+      pointer-events:none;
+      animation:float 6s ease-in-out infinite;
+    }
+    .orb-1 { width:280px; height:280px; background:var(--np-pink); top:-90px; right:-70px; }
+    .orb-2 { width:200px; height:200px; background:var(--np-purple); bottom:20px; left:-60px; animation-delay:2s; }
+    .orb-3 { width:140px; height:140px; background:var(--np-blue); bottom:90px; right:10%; animation-delay:4s; }
+    .page-shell { position:relative; z-index:1; }
+    .register-layout {
+      max-width:1180px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:minmax(280px, 360px) minmax(0, 1fr);
+      gap:1.5rem;
+      align-items:start;
+    }
+    .intro-card {
+      padding:2rem;
+      position:sticky;
+      top:100px;
+      animation:fadeInUp .45s ease-out both;
+    }
+    .intro-badge {
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      padding:.45rem .8rem;
+      border-radius:999px;
+      background:var(--np-pink-soft);
+      color:var(--np-pink);
+      font-size:.75rem;
+      font-weight:800;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+    [data-bs-theme="dark"] .intro-badge { background:rgba(244,63,94,.12); }
+    .intro-list {
+      display:grid;
+      gap:.8rem;
+      margin-top:1.5rem;
+    }
+    .intro-item {
+      display:flex;
+      gap:.8rem;
+      align-items:flex-start;
+      padding:.9rem 1rem;
+      border:1px solid var(--np-border);
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.12));
+    }
+    [data-bs-theme="dark"] .intro-item { background:rgba(15,23,42,.35); }
+    .intro-icon {
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1rem;
+      flex:0 0 auto;
+    }
+    .intro-icon.pink { background:rgba(244,63,94,.12); color:var(--np-pink); }
+    .intro-icon.blue { background:rgba(59,130,246,.12); color:var(--np-blue); }
+    .intro-icon.green { background:rgba(16,185,129,.12); color:var(--np-green); }
+    .form-card {
+      padding:2rem;
+      animation:fadeInUp .5s ease-out both;
+    }
+    .section-block + .section-block {
+      margin-top:1.5rem;
+      padding-top:1.5rem;
+      border-top:1px solid var(--np-border);
+    }
+    .section-title {
+      font-size:1.05rem;
+      font-weight:800;
+      margin-bottom:.25rem;
+    }
+    .section-desc {
+      color:var(--np-text-muted);
+      font-size:.88rem;
+      margin-bottom:1rem;
+    }
+    .helper-text {
+      color:var(--np-text-muted);
+      font-size:.78rem;
+      line-height:1.55;
+      margin-top:.45rem;
+    }
+    .back-link {
+      color:var(--np-text-muted);
+      font-size:.84rem;
+      font-weight:700;
+      text-decoration:none;
+    }
+    .back-link:hover { color:var(--np-purple); }
+    .footer-note {
+      color:var(--np-text-muted);
+      font-size:.74rem;
+      line-height:1.6;
+    }
+    #toast-container {
+      position:fixed;
+      top:1.5rem;
+      right:1.5rem;
+      z-index:9999;
+      display:flex;
+      flex-direction:column;
+      gap:.5rem;
+      pointer-events:none;
+    }
+    #toast-container .toast { pointer-events:auto; }
+
+    @media (max-width: 991.98px) {
+      .register-layout { grid-template-columns:1fr; }
+      .intro-card { position:relative; top:auto; }
+    }
+    @media (max-width: 767.98px) {
+      .form-card,
+      .intro-card { padding:1.35rem; border-radius:20px; }
+      .register-layout { gap:1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toast-container"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="min-vh-100 d-flex flex-column">
+    <header class="py-3 px-4 d-flex align-items-center justify-content-between" style="background:var(--np-card); border-bottom:1px solid var(--np-border); position:sticky; top:0; z-index:100; backdrop-filter:blur(12px);">
+      <img src="encabezado.png" alt="NeuroPro" class="np-header-img" />
+      <button class="btn-theme border-0" onclick="NP_toggleTheme()" title="Cambiar tema">
+        <i id="theme-icon" class="fas fa-moon"></i>
+      </button>
+    </header>
+
+    <main class="flex-grow-1 py-4 py-lg-5 px-3 px-lg-4 page-shell">
+      <div class="register-layout">
+        <aside class="np-card intro-card">
+          <span class="intro-badge">
+            <i class="fas fa-user-shield"></i>
+            Registro de demo
+          </span>
+          <h1 class="mt-3 mb-2" style="font-size:2rem; font-weight:900; line-height:1.05;">Crea la cuenta administradora de <span class="np-brand">NeuroPro</span></h1>
+          <p class="mb-0" style="color:var(--np-text-muted); line-height:1.7;">
+            Esta cuenta guardará los datos básicos del cuidador responsable y del alumno para que la demo funcione con inicio de sesión local.
+          </p>
+
+          <div class="intro-list">
+            <div class="intro-item">
+              <div class="intro-icon pink"><i class="fas fa-lock"></i></div>
+              <div>
+                <div class="fw-bold" style="font-size:.9rem;">Acceso administrado</div>
+                <div class="footer-note">Se guarda correo y contraseña de la cuenta para iniciar sesión desde `index.html`.</div>
+              </div>
+            </div>
+            <div class="intro-item">
+              <div class="intro-icon blue"><i class="fas fa-child-reaching"></i></div>
+              <div>
+                <div class="fw-bold" style="font-size:.9rem;">Perfil del alumno</div>
+                <div class="footer-note">Se registra nombre, edad y contexto básico para poblar la experiencia del alumno en la demo.</div>
+              </div>
+            </div>
+            <div class="intro-item">
+              <div class="intro-icon green"><i class="fas fa-database"></i></div>
+              <div>
+                <div class="fw-bold" style="font-size:.9rem;">Guardado local</div>
+                <div class="footer-note">La información se almacena en caché local del navegador usando `localStorage`, igual que el resto del demo.</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="np-card form-card">
+          <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+            <div>
+              <div style="font-size:.76rem; font-weight:800; color:var(--np-purple); text-transform:uppercase; letter-spacing:.08em;">Nuevo registro</div>
+              <h2 class="mb-1" style="font-size:1.55rem; font-weight:900;">Información básica de la cuenta</h2>
+              <p class="section-desc mb-0">Completa los datos del administrador y del alumno. Con esto queda lista una cuenta funcional para la demo.</p>
+            </div>
+            <a href="index.html" class="back-link d-inline-flex align-items-center gap-2">
+              <i class="fas fa-arrow-left"></i>
+              Volver al login
+            </a>
+          </div>
+
+          <form id="register-form" novalidate>
+            <div class="section-block">
+              <div class="section-title">Cuenta administradora</div>
+              <div class="section-desc">Datos del responsable que administrará la plataforma.</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="np-label" for="admin-name">Nombre completo</label>
+                  <input id="admin-name" class="np-input" type="text" placeholder="Ej. María López" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="np-label" for="admin-role">Rol del responsable</label>
+                  <select id="admin-role" class="np-select" required>
+                    <option value="Madre">Madre</option>
+                    <option value="Padre">Padre</option>
+                    <option value="Cuidador">Cuidador</option>
+                    <option value="Terapeuta">Terapeuta</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="np-label" for="admin-email">Correo electrónico</label>
+                  <input id="admin-email" class="np-input" type="email" placeholder="ejemplo@correo.com" required />
+                </div>
+                <div class="col-md-3">
+                  <label class="np-label" for="admin-password">Contraseña</label>
+                  <input id="admin-password" class="np-input" type="password" placeholder="Mínimo 6 caracteres" required />
+                </div>
+                <div class="col-md-3">
+                  <label class="np-label" for="admin-password-confirm">Confirmar</label>
+                  <input id="admin-password-confirm" class="np-input" type="password" placeholder="Repite la contraseña" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="np-label" for="admin-pin">PIN del perfil</label>
+                  <input id="admin-pin" class="np-input" type="password" maxlength="6" inputmode="numeric" placeholder="4 a 6 dígitos" required />
+                  <div class="helper-text">Este PIN se usará cuando el cuidador entre desde la selección de perfiles.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-title">Perfil del alumno</div>
+              <div class="section-desc">Datos básicos para personalizar la vista del niño dentro de la demo.</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="np-label" for="student-name">Nombre del alumno</label>
+                  <input id="student-name" class="np-input" type="text" placeholder="Ej. Tomás López" required />
+                </div>
+                <div class="col-md-3">
+                  <label class="np-label" for="student-age">Edad</label>
+                  <input id="student-age" class="np-input" type="number" min="3" max="99" placeholder="12" required />
+                </div>
+                <div class="col-md-3">
+                  <label class="np-label" for="student-communication">Comunicación</label>
+                  <select id="student-communication" class="np-select" required>
+                    <option value="Verbal con apoyo visual">Verbal con apoyo visual</option>
+                    <option value="Verbal">Verbal</option>
+                    <option value="CAA con apoyo visual">CAA con apoyo visual</option>
+                    <option value="No verbal con apoyos">No verbal con apoyos</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="np-label" for="student-diagnosis">Diagnóstico o condición principal</label>
+                  <input id="student-diagnosis" class="np-input" type="text" placeholder="Ej. TEA nivel 1" />
+                </div>
+                <div class="col-md-6">
+                  <label class="np-label" for="student-notes">Observación breve</label>
+                  <input id="student-notes" class="np-input" type="text" placeholder="Ej. Requiere anticipación visual y rutinas claras" />
+                </div>
+              </div>
+            </div>
+
+            <div class="section-block">
+              <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <p class="footer-note mb-0">
+                  El registro actual es local y funcional para demo. No envía datos a servidor.
+                </p>
+                <button type="submit" class="btn btn-np-save">
+                  Crear cuenta
+                  <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="shared.js"></script>
+  <script>
+    const NP_STORAGE = {
+      session: 'NP_session_2026',
+      profile: 'NP_profile_2026',
+      network: 'NP_network_2026',
+      accounts: 'NP_accounts_2026'
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      NP_initSystem();
+      NP_applyTheme();
+      document.getElementById('register-form').addEventListener('submit', handleRegister);
+    });
+
+    function getStoredAccounts() {
+      try {
+        return JSON.parse(localStorage.getItem(NP_STORAGE.accounts)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function setStoredAccounts(accounts) {
+      localStorage.setItem(NP_STORAGE.accounts, JSON.stringify(accounts));
+    }
+
+    function handleRegister(event) {
+      event.preventDefault();
+
+      const adminName = document.getElementById('admin-name').value.trim();
+      const adminRole = document.getElementById('admin-role').value;
+      const adminEmail = document.getElementById('admin-email').value.trim().toLowerCase();
+      const adminPassword = document.getElementById('admin-password').value;
+      const adminPasswordConfirm = document.getElementById('admin-password-confirm').value;
+      const adminPin = document.getElementById('admin-pin').value.trim();
+      const studentName = document.getElementById('student-name').value.trim();
+      const studentAge = Number(document.getElementById('student-age').value);
+      const studentCommunication = document.getElementById('student-communication').value;
+      const studentDiagnosis = document.getElementById('student-diagnosis').value.trim() || 'No especificado';
+      const studentNotes = document.getElementById('student-notes').value.trim();
+
+      if (!adminName || !adminEmail || !adminPassword || !adminPasswordConfirm || !adminPin || !studentName || !studentAge) {
+        NP_showToast('Completa todos los campos obligatorios.', 'error');
+        return;
+      }
+      if (adminPassword.length < 6) {
+        NP_showToast('La contraseña debe tener al menos 6 caracteres.', 'error');
+        return;
+      }
+      if (adminPassword !== adminPasswordConfirm) {
+        NP_showToast('Las contraseñas no coinciden.', 'error');
+        return;
+      }
+      if (!/^\d{4,6}$/.test(adminPin)) {
+        NP_showToast('El PIN debe tener entre 4 y 6 dígitos.', 'error');
+        return;
+      }
+      if (!Number.isFinite(studentAge) || studentAge < 3 || studentAge > 99) {
+        NP_showToast('La edad del alumno no es válida.', 'error');
+        return;
+      }
+
+      const accounts = getStoredAccounts();
+      if (accounts.some(account => (account.email || '').toLowerCase() === adminEmail)) {
+        NP_showToast('Ese correo ya está registrado en esta demo.', 'error');
+        return;
+      }
+
+      const profile = {
+        name: studentName,
+        age: studentAge,
+        diagnosis: studentDiagnosis,
+        communication: studentCommunication,
+        notes: studentNotes,
+        photo: null
+      };
+
+      const network = [
+        {
+          id: 1,
+          name: adminName,
+          role: adminRole,
+          photo: null,
+          active: true,
+          pin: adminPin
+        }
+      ];
+
+      const account = {
+        id: Date.now(),
+        name: adminName,
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin',
+        profile,
+        network,
+        createdAt: new Date().toISOString()
+      };
+
+      accounts.push(account);
+      setStoredAccounts(accounts);
+      localStorage.removeItem(NP_STORAGE.session);
+
+      NP_showToast('Registro guardado. Redirigiendo al inicio de sesión...', 'success');
+      setTimeout(() => {
+        window.location.href = 'index.html?registered=1&email=' + encodeURIComponent(adminEmail);
+      }, 900);
+    }
+  </script>
+</body>
+</html>

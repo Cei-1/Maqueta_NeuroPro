@@ -10,6 +10,7 @@ const NP_KEYS = {
   SESSION:    'NP_session_2026',
   PROFILE:    'NP_profile_2026',
   NETWORK:    'NP_network_2026',
+  ACCOUNTS:   'NP_accounts_2026',
   ROUTINES:   'NP_routinesData_2026',
   SUPPORTS:   'NP_supportsState_2026',
   ACTIVE:     'NP_activeRoutinesState_2026',

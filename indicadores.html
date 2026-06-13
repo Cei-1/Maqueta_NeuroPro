@@ -89,9 +89,90 @@
     .ring-bg{stroke:rgba(0,0,0,.06);fill:none;}
     [data-bs-theme="dark"] .ring-bg{stroke:rgba(255,255,255,.08);}
     .ring-fill{fill:none;stroke-linecap:round;transition:stroke-dashoffset .8s ease;}
+    .standalone-global-mobile{width:100%;}
 
+    @media(min-width:769px) and (max-width:991.98px){
+      html, body{overflow-x:hidden;}
+      .indicators-page{
+        padding-left:1rem !important;
+        padding-right:1rem !important;
+        overflow-x:hidden;
+      }
+      .fade-in-up{
+        animation:none;
+      }
+      .summary-stats-row{
+        margin-bottom:1.25rem !important;
+      }
+      .summary-stats-row,
+      .indicators-chart-row{
+        --bs-gutter-x:1rem;
+        margin-left:0;
+        margin-right:0;
+      }
+      .summary-stats-row > [class*="col-"],
+      .indicators-chart-row > [class*="col-"]{
+        padding-left:.5rem;
+        padding-right:.5rem;
+      }
+      .np-header{
+        padding:.85rem 1rem;
+      }
+      .summary-stats-row .stat-card{
+        min-height:140px;
+        padding:1rem;
+      }
+      .summary-stats-row .stat-card .stat-val{
+        font-size:1.45rem;
+      }
+      .global-card-col .np-card{
+        padding:1.25rem !important;
+      }
+      .global-card-col .np-card blockquote{
+        margin:0;
+        max-width:280px;
+      }
+      .global-card-col .np-card > div[style*="position:relative;width:140px"]{
+        width:120px !important;
+        height:120px !important;
+        margin:0 auto .85rem !important;
+      }
+      .global-card-col .np-card > div[style*="position:relative;width:140px"] svg{
+        width:120px;
+        height:120px;
+      }
+      .global-card-col .np-card > div[style*="position:relative;width:140px"] #global-pct-text{
+        font-size:1.25rem !important;
+      }
+      .chart-card-col .np-card{
+        padding:1rem !important;
+      }
+      .chart-card-col .np-card > div:first-child{
+        flex-wrap:wrap;
+        gap:.75rem;
+        align-items:flex-start !important;
+      }
+      .chart-card-col #chart-filter{
+        width:100% !important;
+      }
+      .bar-chart-wrap{
+        height:180px;
+        gap:8px;
+      }
+      .bar-item{
+        min-width:36px;
+      }
+      .table-responsive{
+        border-radius:14px;
+      }
+      .np-card,
+      .table-responsive,
+      .bar-chart-wrap{
+        max-width:100%;
+      }
+    }
 
-    @media(max-width:768px){
+    @media(max-width:991.98px){
       .np-sidebar{
         width:100%; min-height:auto; height:62px;
         flex-direction:row; border-right:none;
@@ -140,7 +221,7 @@
       </div>
     </header>
 
-    <div class="p-4 p-md-5" style="max-width:1300px;margin:0 auto;">
+    <div class="p-4 p-md-5 indicators-page" style="max-width:1300px;margin:0 auto;">
 
       <!-- Title -->
       <div class="mb-5 fade-in-up">
@@ -152,7 +233,7 @@
       </div>
 
       <!-- Summary stats -->
-      <div class="row g-3 mb-5 fade-in-up delay-1">
+      <div class="row g-3 mb-5 fade-in-up delay-1 summary-stats-row">
         <div class="col-6 col-lg-3">
           <div class="stat-card text-center">
             <div class="stat-icon mx-auto" style="background:rgba(168,85,247,.1);"><i class="fas fa-trophy" style="color:var(--np-purple);"></i></div>
@@ -184,10 +265,10 @@
       </div>
 
       <!-- Chart + ring row -->
-      <div class="row g-4 mb-5">
+      <div class="row g-4 mb-5 indicators-chart-row">
 
         <!-- Evolution bar chart -->
-        <div class="col-lg-8 fade-in-up delay-1">
+        <div class="col-lg-8 fade-in-up delay-1 chart-card-col">
           <div class="np-card p-4 h-100">
             <div class="d-flex align-items-center justify-content-between mb-4">
               <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);">
@@ -213,7 +294,7 @@
         </div>
 
         <!-- Global ring -->
-        <div class="col-lg-4 fade-in-up delay-2">
+        <div class="col-lg-4 fade-in-up delay-2 global-card-col">
           <div class="np-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center">
             <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--np-text-muted);margin-bottom:1.25rem;">
               <i class="fas fa-chart-pie me-1" style="color:var(--np-purple);"></i> Independencia Global
@@ -256,7 +337,6 @@
                 <th>Promedio Actual</th>
                 <th>Promedio Anterior</th>
                 <th>Sesiones</th>
-                <th>Tendencia</th>
               </tr>
             </thead>
             <tbody id="indicators-table"></tbody>
@@ -309,8 +389,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   execModal = new bootstrap.Modal(document.getElementById('execModal'));
 
+  reorderGlobalCardForResponsive();
+  window.addEventListener('resize', reorderGlobalCardForResponsive);
   renderAll();
 });
+
+function reorderGlobalCardForResponsive() {
+  const page = document.querySelector('.indicators-page');
+  const summaryRow = document.querySelector('.summary-stats-row');
+  const chartRow = document.querySelector('.indicators-chart-row');
+  const chartCard = document.querySelector('.chart-card-col');
+  const globalCard = document.querySelector('.global-card-col');
+  if (!page || !summaryRow || !chartRow || !chartCard || !globalCard) return;
+
+  if (window.innerWidth <= 991.98) {
+    if (page.firstElementChild !== globalCard) {
+      globalCard.classList.add('standalone-global-mobile', 'mb-4');
+      page.insertBefore(globalCard, summaryRow);
+    }
+  } else {
+    globalCard.classList.remove('standalone-global-mobile', 'mb-4');
+    if (globalCard.parentElement !== chartRow || chartCard.nextElementSibling !== globalCard) {
+      chartRow.insertBefore(globalCard, chartCard.nextSibling);
+    }
+  }
+}
 
 function renderAll() {
   renderKPIs();
@@ -320,30 +423,67 @@ function renderAll() {
   renderHistoryTable();
 }
 
+function getSkillScoreSeries(skillKey) {
+  return NP_getHistory()
+    .filter(item => item.skill === skillKey && Number.isFinite(Number(item.score)))
+    .map(item => Number(item.score));
+}
+
+function getSkillIndicatorStats(skillKey) {
+  const scores = getSkillScoreSeries(skillKey);
+  if (!scores.length) return { current: 0, baseline: 0, sessions: 0, diff: 0 };
+
+  const current = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+  const baseline = scores.length === 1
+    ? scores[0]
+    : scores.slice(0, -1).reduce((sum, score) => sum + score, 0) / (scores.length - 1);
+
+  const currentRounded = parseFloat(current.toFixed(2));
+  const baselineRounded = parseFloat(baseline.toFixed(2));
+
+  return {
+    current: currentRounded,
+    baseline: baselineRounded,
+    sessions: scores.length,
+    diff: parseFloat((currentRounded - baselineRounded).toFixed(2)),
+  };
+}
+
+function getGlobalIndicatorStats() {
+  const keys = Object.keys(NP_getRoutines());
+  if (!keys.length) return { current: 0, baseline: 0, diff: 0 };
+
+  const totals = keys.reduce((acc, key) => {
+    const stats = getSkillIndicatorStats(key);
+    acc.current += stats.current;
+    acc.baseline += stats.baseline;
+    return acc;
+  }, { current: 0, baseline: 0 });
+
+  const current = parseFloat((totals.current / keys.length).toFixed(1));
+  const baseline = parseFloat((totals.baseline / keys.length).toFixed(1));
+  return { current, baseline, diff: parseFloat((current - baseline).toFixed(1)) };
+}
+
 function renderKPIs() {
   const routines = NP_getRoutines();
   const history  = NP_getHistory();
+  const globalStats = getGlobalIndicatorStats();
 
   // Global
-  const globalScore = NP_getGlobalScore();
-  document.getElementById('kpi-global').textContent = globalScore + '%';
+  document.getElementById('kpi-global').textContent = globalStats.current + '%';
   document.getElementById('kpi-sessions').textContent = history.length;
 
   // Best skill
   let bestKey = null; let bestPct = -1;
   Object.keys(routines).forEach(k => {
-    const p = NP_calcIndependence(k).percentage;
+    const p = getSkillIndicatorStats(k).current;
     if (p > bestPct) { bestPct=p; bestKey=k; }
   });
   document.getElementById('kpi-best').textContent = bestKey ? routines[bestKey].icon + ' ' + bestPct + '%' : '—';
 
   // Average improvement
-  let improvements = [];
-  Object.keys(routines).forEach(k => {
-    const baseline = routines[k].baselineAutonomy || 0;
-    const current  = NP_calcIndependence(k).percentage;
-    improvements.push(current - baseline);
-  });
+  const improvements = Object.keys(routines).map(k => getSkillIndicatorStats(k).diff);
   const avgImp = improvements.length ? improvements.reduce((a,b)=>a+b,0)/improvements.length : 0;
   const kpiImp = document.getElementById('kpi-improvement');
   kpiImp.textContent = (avgImp >= 0 ? '+' : '') + avgImp.toFixed(1) + '%';
@@ -361,8 +501,9 @@ function renderBarChart() {
 
   keys.forEach(key => {
     const r    = routines[key];
-    const pct  = NP_calcIndependence(key).percentage;
-    const base = r.baselineAutonomy || 0;
+    const stats = getSkillIndicatorStats(key);
+    const pct  = stats.current;
+    const base = stats.baseline;
     const hCur = Math.max((pct/100)*maxH, 4);
     const hBase= Math.max((base/100)*maxH, 4);
     const color = pct>=75?'var(--np-green)':pct>=50?'var(--np-orange)':'var(--np-pink)';
@@ -381,7 +522,8 @@ function renderBarChart() {
 }
 
 function renderGlobalRing() {
-  const globalScore = NP_getGlobalScore();
+  const globalStats = getGlobalIndicatorStats();
+  const globalScore = globalStats.current;
   document.getElementById('global-pct-text').textContent = globalScore + '%';
   const circ   = 2*Math.PI*58;
   const offset = circ-(globalScore/100)*circ;
@@ -389,12 +531,7 @@ function renderGlobalRing() {
   ring.style.strokeDasharray  = circ;
   setTimeout(()=>{ ring.style.strokeDashoffset = offset; }, 200);
 
-  const routines = NP_getRoutines();
-  let baseAvg = 0;
-  const keys = Object.keys(routines);
-  keys.forEach(k=>{ baseAvg += (routines[k].baselineAutonomy||0); });
-  baseAvg = keys.length ? baseAvg/keys.length : 0;
-  const diff = globalScore - baseAvg;
+  const diff = globalStats.diff;
   const trendEl = document.getElementById('global-trend');
   if (diff>0) trendEl.innerHTML=`<span style="color:var(--np-green);"><i class="fas fa-arrow-trend-up me-1"></i>+${diff.toFixed(1)}% vs promedio anterior</span>`;
   else if(diff<0) trendEl.innerHTML=`<span style="color:var(--np-pink);"><i class="fas fa-arrow-trend-down me-1"></i>${diff.toFixed(1)}% vs promedio anterior</span>`;
@@ -409,23 +546,17 @@ function filterIndicators(cat) {
 function renderIndicatorsTable() {
   const tbody    = document.getElementById('indicators-table');
   const routines = NP_getRoutines();
-  const history  = NP_getHistory();
   tbody.innerHTML = '';
 
   Object.keys(routines).forEach(key => {
     const r = routines[key];
     if (indicatorCategory!=='all' && r.category!==indicatorCategory) return;
 
-    const pct      = NP_calcIndependence(key).percentage;
-    const base     = r.baselineAutonomy || 0;
-    const diff     = pct - base;
-    const sessions = history.filter(h=>h.skill===key).length;
+    const stats    = getSkillIndicatorStats(key);
+    const pct      = stats.current;
+    const base     = stats.baseline;
+    const sessions = stats.sessions;
     const pctColor = pct>=75?'var(--np-green)':pct>=50?'var(--np-orange)':'var(--np-pink)';
-
-    let trendHtml;
-    if (diff>0) trendHtml=`<span style="color:var(--np-green);font-weight:700;font-size:.75rem;"><i class="fas fa-arrow-up me-1"></i>+${diff.toFixed(1)}%</span>`;
-    else if(diff<0) trendHtml=`<span style="color:var(--np-pink);font-weight:700;font-size:.75rem;"><i class="fas fa-arrow-down me-1"></i>${diff.toFixed(1)}%</span>`;
-    else trendHtml=`<span style="color:var(--np-text-muted);font-weight:600;font-size:.75rem;"><i class="fas fa-minus me-1"></i>Sin cambio</span>`;
 
     tbody.innerHTML += `
       <tr>
@@ -442,7 +573,6 @@ function renderIndicatorsTable() {
           <span style="font-size:.8rem;color:var(--np-text-muted);">${base}%</span>
         </td>
         <td><span style="font-size:.78rem;color:var(--np-text-muted);">${sessions}</span></td>
-        <td>${trendHtml}</td>
       </tr>`;
   });
 }

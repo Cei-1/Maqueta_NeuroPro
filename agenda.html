@@ -949,9 +949,22 @@
           <div class="modal-body px-4 pb-2">
             <input type="hidden" id="tm-id" />
             <div class="row g-3">
+              <div class="col-md-6">
+                <label class="np-label">Filtrar por categoría</label>
+                <select class="np-input" id="tm-category-filter"></select>
+              </div>
+              <div class="col-md-6">
+                <label class="np-label">Buscar actividad</label>
+                <input
+                  type="text"
+                  class="np-input"
+                  id="tm-skill-search"
+                  placeholder="Nombre..."
+                />
+              </div>
               <!-- Skill selector -->
               <div class="col-12">
-                <label class="np-label">Actividad</label>
+                <label class="np-label">Actividad seleccionada</label>
                 <select class="np-input" id="tm-skill"></select>
               </div>
               <!-- Label override -->
@@ -1268,6 +1281,14 @@
       let editingDateContext = null; // date string for cancel-for-date action
       let viewDate = new Date().toISOString().slice(0, 10);
       let taskModal, execModal;
+      let allSkillEntries = [];
+      const CATEGORY_ICONS = {
+        "Vida Diaria": "🧼",
+        "Rutina Escolar": "🎒",
+        "Regulación Emocional": "🌬️",
+        "Actividades Sociales": "🤝",
+        "Sin categoría": "📁",
+      };
 
       let gradingExecId = null;
       let gradingSupports = {}; // stepId -> level
@@ -1304,13 +1325,26 @@
       function populateSkillSelect() {
         const sel = document.getElementById("tm-skill");
         const routines = NP_getRoutines();
-        sel.innerHTML = "";
-        Object.keys(routines).forEach((key) => {
-          const opt = document.createElement("option");
-          opt.value = key;
-          opt.textContent = `${routines[key].icon} ${routines[key].name}`;
-          sel.appendChild(opt);
-        });
+        const categoryFilter = document.getElementById("tm-category-filter");
+        const skillSearch = document.getElementById("tm-skill-search");
+
+        allSkillEntries = Object.keys(routines).map((key) => ({
+          key,
+          name: routines[key].name,
+          icon: routines[key].icon,
+          category: routines[key].category || "Sin categoría",
+        }));
+
+        const categories = [...new Set(allSkillEntries.map((entry) => entry.category))].sort();
+        categoryFilter.innerHTML =
+          `<option value="">⭐ Todas las categorías</option>` +
+          categories
+            .map((category) => {
+              const icon = CATEGORY_ICONS[category] || "📁";
+              return `<option value="${category}">${icon} ${category}</option>`;
+            })
+            .join("");
+
         // Auto-fill label on change
         sel.addEventListener("change", () => {
           const r = NP_getRoutines()[sel.value];
@@ -1318,11 +1352,71 @@
             document.getElementById("tm-label").value = r.name;
           }
         });
+        categoryFilter.addEventListener("change", () => filterSkillSelect());
+        skillSearch.addEventListener("input", () => filterSkillSelect());
         document
           .getElementById("tm-label")
           .addEventListener("input", function () {
             this.dataset.touched = "1";
           });
+
+        filterSkillSelect();
+      }
+
+      function filterSkillSelect(selectedSkill = null) {
+        const sel = document.getElementById("tm-skill");
+        const category = document.getElementById("tm-category-filter").value;
+        const search = document
+          .getElementById("tm-skill-search")
+          .value.trim()
+          .toLowerCase();
+
+        const filtered = allSkillEntries.filter((entry) => {
+          if (category && entry.category !== category) return false;
+          if (
+            search &&
+            !`${entry.name} ${entry.category}`.toLowerCase().includes(search)
+          )
+            return false;
+          return true;
+        });
+
+        sel.innerHTML = "";
+        filtered.forEach((entry) => {
+          const opt = document.createElement("option");
+          opt.value = entry.key;
+          opt.textContent = `${entry.icon} ${entry.name}`;
+          sel.appendChild(opt);
+        });
+
+        if (!filtered.length) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "No hay actividades disponibles";
+          sel.appendChild(opt);
+          sel.disabled = true;
+          if (!document.getElementById("tm-label").dataset.touched) {
+            document.getElementById("tm-label").value = "";
+          }
+          return;
+        }
+
+        sel.disabled = false;
+        const targetValue =
+          selectedSkill && filtered.some((entry) => entry.key === selectedSkill)
+            ? selectedSkill
+            : sel.value && filtered.some((entry) => entry.key === sel.value)
+              ? sel.value
+              : filtered[0].key;
+
+        sel.value = targetValue;
+        const selectedRoutine = NP_getRoutines()[targetValue];
+        if (
+          selectedRoutine &&
+          !document.getElementById("tm-label").dataset.touched
+        ) {
+          document.getElementById("tm-label").value = selectedRoutine.name;
+        }
       }
 
       function buildColorSwatches() {
@@ -1444,6 +1538,8 @@
         document.getElementById("tm-id").value = "";
         document.getElementById("tm-label").value = "";
         delete document.getElementById("tm-label").dataset.touched;
+        document.getElementById("tm-category-filter").value = "";
+        document.getElementById("tm-skill-search").value = "";
         document.getElementById("tm-time").value = "07:00";
         document.getElementById("tm-single-date").value = new Date()
           .toISOString()
@@ -1455,6 +1551,7 @@
         document.getElementById("tm-repetitiva").checked = false;
         document.getElementById("tm-rep-type").value = "always";
         toggleRepetitiveSection();
+        filterSkillSelect();
         document
           .querySelectorAll(".day-pill")
           .forEach((el) => el.classList.remove("active"));
@@ -1467,6 +1564,11 @@
           document.getElementById("taskModalTitle").textContent =
             "Editar Tarea";
           document.getElementById("tm-id").value = t.id;
+          const taskRoutine = NP_getRoutines()[t.skillKey];
+          document.getElementById("tm-category-filter").value =
+            taskRoutine?.category || "";
+          document.getElementById("tm-skill-search").value = taskRoutine?.name || "";
+          filterSkillSelect(t.skillKey);
           document.getElementById("tm-skill").value = t.skillKey;
           document.getElementById("tm-label").value = t.label;
           document.getElementById("tm-label").dataset.touched = "1";
@@ -1628,7 +1730,7 @@
           NP_showToast("Escribe una etiqueta para la tarea.", "error");
           return;
         }
-        if (!skillKey) {
+        if (!skillKey || document.getElementById("tm-skill").disabled) {
           NP_showToast("Selecciona una actividad.", "error");
           return;
         }
@@ -1953,6 +2055,24 @@
           .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
       }
 
+      function getGradeableExecution(taskId, dateStr) {
+        const execs = NP_getExecutionsForTaskDate(taskId, dateStr);
+        if (!execs.length) return null;
+        return (
+          execs.find((e) => e.caregiver === "Tomás (Alumno)") ||
+          execs[execs.length - 1]
+        );
+      }
+
+      function openExistingExecutionForGrading(taskId, dateStr) {
+        const exec = getGradeableExecution(taskId, dateStr);
+        if (!exec) {
+          NP_showToast("La actividad aún no ha sido realizada.", "warning");
+          return;
+        }
+        startGrading(exec.id);
+      }
+
       function renderTodayTimeline() {
         const tasks = NP_getTasksForDateCaregiver(viewDate);
         const routines = NP_getRoutines();
@@ -2013,9 +2133,9 @@
           <i class="fas fa-trash"></i>
         </button>`;
           } else {
-            // Active: show Calificar + Cancelar (no delete yet)
+            const canGrade = execs.length > 0;
             actionBtns = `
-        <button onclick="event.stopPropagation(); createNewExecutionForGrading('${t.id}', '${t.skillKey}', '${viewDate}')" class="btn btn-sm fw-bold border-0" style="border-radius:10px;background:${t.color}18;color:${t.color};font-size:.7rem;" title="Calificar actividad">
+        <button onclick="event.stopPropagation(); ${canGrade ? `openExistingExecutionForGrading('${t.id}', '${viewDate}')` : ""}" class="btn btn-sm fw-bold border-0" ${canGrade ? "" : "disabled"} style="border-radius:10px;background:${canGrade ? `${t.color}18` : "rgba(148,163,184,.16)"};color:${canGrade ? t.color : "var(--np-text-muted)"};font-size:.7rem;opacity:${canGrade ? "1" : ".72"};cursor:${canGrade ? "pointer" : "not-allowed"};" title="${canGrade ? "Calificar actividad realizada" : "Disponible cuando la actividad haya sido realizada"}">
           <i class="fas fa-clipboard-check"></i> Calificar
         </button>
         <button onclick="event.stopPropagation(); cancelTaskForDate('${t.id}', '${viewDate}')" class="btn btn-sm fw-bold py-1 px-2 border-0" style="border-radius:10px; font-size:.7rem; background:rgba(249,115,22,.1); color:var(--np-orange);" title="Cancelar para este día">
